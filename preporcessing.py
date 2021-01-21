@@ -14,7 +14,6 @@ class TimeSeries:
         """
         Read from a CSV file, the project description
         says the CSV files are ordered in (time, magnitude)
-        but they're not?? So whatever, we're off to a great start.
         Index by time
         :param file_name: name of the csv file to open
         :return: void
