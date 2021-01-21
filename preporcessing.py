@@ -14,11 +14,10 @@ class TimeSeries:
         """
         Read from a CSV file, the project description
         says the CSV files are ordered in (time, magnitude)
-        but they're not?? So whatever, we're off to a great start
-        TODO change this docstring lol
-        TODO get what we want to index by
+        but they're not?? So whatever, we're off to a great start.
+        Index by time
         :param file_name: name of the csv file to open
-        :return: list of all data point
+        :return: void
         """
 
         try:
@@ -28,9 +27,6 @@ class TimeSeries:
 
     def write_to_file(self, file_name: str):
         """
-        Project specification says file_name is the only parameter?
-        Is data supposed to be a global variable?
-        TODO figure that out
         Write data to a CSV file
         :param data: data to write to CSV file
         :param file_name: name of the output file
