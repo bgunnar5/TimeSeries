@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+from preporcessing import *
 
 
 def read_from_file(file_name: str):
@@ -12,9 +14,7 @@ def read_from_file(file_name: str):
     """
 
     try:
-        csv_file = pd.read_csv(file_name, sep='\n')
-        print(csv_file.head())
-        print(type(csv_file))
+        csv_file = pd.read_csv(file_name)
         return csv_file
     except FileNotFoundError:
         print(f"File {file_name} not found.")
@@ -36,8 +36,13 @@ def write_to_file(data, file_name: str):
 
 def main():
 
-    bs = read_from_file("Project Description/Time Series Data/6_sunspots_train.csv")
-    write_to_file(bs, "hi.csv")
+    # bs = read_from_file("Project Description/Time Series Data 2/AtmPres2005NovMin.csv")
+    # write_to_file(bs, "hi.csv")
+    # print(bs['DATE (MM/DD/YYYY)'])
 
+    test = TimeSeries()
+    test.read_from_file("Project Description/Time Series Data 2/example.csv")
+    print(test.data.head())
+    test.write_to_file("new_csv.csv")
 
 main()
