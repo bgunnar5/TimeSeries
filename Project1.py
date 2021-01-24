@@ -1,14 +1,14 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime, date, timedelta
 from preporcessing import *
+import re
 
 
 def read_from_file(file_name: str):
     """
     Read from a CSV file, the project description
     says the CSV files are ordered in (time, magnitude)
-    but they're not?? So whatever, we're off to a great start
-    TODO change this docstring lol
     :param file_name: name of the csv file to open
     :return: list of all data point
     """
@@ -22,9 +22,6 @@ def read_from_file(file_name: str):
 
 def write_to_file(data, file_name: str):
     """
-    Project specification says file_name is the only parameter?
-    Is data supposed to be a global variable?
-    TODO figure that out
     Write data to a CSV file
     :param data: data to write to CSV file
     :param file_name: name of the output file
@@ -36,13 +33,28 @@ def write_to_file(data, file_name: str):
 
 def main():
 
-    # bs = read_from_file("Project Description/Time Series Data 2/AtmPres2005NovMin.csv")
-    # write_to_file(bs, "hi.csv")
-    # print(bs['DATE (MM/DD/YYYY)'])
+    while(1):
+        print("Enter file location")
+        file_location = input()
+        ts = TimeSeries()
+        ts.read_from_file(file_location)
+        print(ts.data)
 
-    test = TimeSeries()
-    test.read_from_file("Project Description/Time Series Data 2/example.csv")
-    print(test.data.head())
-    test.write_to_file("new_csv.csv")
+        print("Available commands for Time Series:")
+        print("A: assign time. Adds missing time data to a time series\n",
+            "W: write time series data to csv file.\n",
+            "P: print data frame\n""Enter a command")
+        command = input().upper()
+        if command == "A":  # assign time
+            print("Enter the starting time in the format mm/dd/yyyy hr:mm")
+            time = input()
+            print("Enter the time increment in hours")
+            increment = input()
+            ts.assign_time(time, increment)
+        elif command == "P":  # print data frame
+            print(ts.data)
+        
+
+
 
 main()
