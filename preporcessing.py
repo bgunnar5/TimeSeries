@@ -7,11 +7,14 @@ import matplotlib.pyplot as plt
 from datetime import date
 from datetime import datetime, date, timedelta
 import re
+import janitor
+
 
 class TimeSeries:
 
     def __init__(self):
-        self.data = None
+        self.data = None  # holds data from initial csv read
+        self.clipped = None  # holds data from a clipped interval
 
     def read_from_file(self, file_name: str):
         """
@@ -65,9 +68,10 @@ class TimeSeries:
         minute = (re.search(minute_reg, start))  # extracted minute
 
         # datetime object for easy time manipulation over an interval
-        date = datetime(year=int(year.group(1)), month=int(month.group(1)), 
-        day=int(day.group(1)), hour=int(hour.group(1)), minute=int(minute.group(1)))
-        
+        date = datetime(year=int(year.group(1)), month=int(month.group(1)),
+                        day=int(day.group(1)), hour=int(hour.group(1)),
+                        minute=int(minute.group(1)))
+
         # create the missing columns in the dataframe
         self.data['DATE (MM/DD/YYYY)'] = None
         self.data['MST'] = None
@@ -83,3 +87,17 @@ class TimeSeries:
             date += timedelta(hours=int(increment))
 
         print(self.data)
+
+    def clip(self, starting_date,  final_date):
+        """
+        Clip a time series from a specific date
+
+        :param starting_date: date str in the form of mm/dd/yyyy
+        :type starting_date: str
+        :param final_date: ending date in the form of mm/dd/yyyy
+        :type final_date: str
+        """
+
+        first_date = self.data.columns[0]  # copy the date header from csv
+        self.clipped = self.data.filter_date(first_date, starting_date, final_date)
+        print(self.clipped.head())
