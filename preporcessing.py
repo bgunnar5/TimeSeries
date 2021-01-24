@@ -15,6 +15,7 @@ class TimeSeries:
     def __init__(self):
         self.data = None  # holds data from initial csv read
         self.clipped = None  # holds data from a clipped interval
+        self.temp = None
 
     def read_from_file(self, file_name: str):
         """
@@ -101,3 +102,21 @@ class TimeSeries:
         first_date = self.data.columns[0]  # copy the date header from csv
         self.clipped = self.data.filter_date(first_date, starting_date, final_date)
         print(self.clipped.head())
+
+    def denoise(self):
+        """
+        Denoise a time series. Should be able to accomplish 
+        this by calling cubic_root
+        """
+
+        pass
+
+    def impute_missing(self):
+        """
+        Compute missing values such as NaN's
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.fillna.html
+        Fills data to the right to NaNs
+        """
+
+        self.temp = self.data.fillna(method='ffill')
+        self.data = self.temp
