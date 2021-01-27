@@ -105,6 +105,7 @@ class TimeSeries:
         first_date = self.data.columns[0]  # copy the date header from csv
         self.clipped = self.data.filter_date(first_date, starting_date, final_date)
         print(self.clipped.head())
+        return self.clipped
 
     def denoise(self):
         """
@@ -124,9 +125,16 @@ class TimeSeries:
         self.temp = self.data.fillna(method='ffill')
         self.data = self.temp
 
+
     def difference(self):
         """
         Calculate the difference between data rows
         """
 
-        self.dif = self.data.copy()
+        data_index = len(self.data.columns) - 1
+        temp = self.data.copy()
+        temp[temp.columns[data_index]] = \
+            self.data[self.data.columns[data_index]] - \
+            self.data[self.data.columns[data_index]].shift(-1)
+        print(temp)
+        return temp
