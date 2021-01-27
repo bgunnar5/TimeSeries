@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from datetime import date
 from datetime import datetime, date, timedelta
 import re
-import janitor
+import janitor  # need to install
 
 
 class TimeSeries:
@@ -15,7 +15,8 @@ class TimeSeries:
     def __init__(self):
         self.data = None  # holds data from initial csv read
         self.clipped = None  # holds data from a clipped interval
-        self.temp = None
+        self.temp = None  # for impute missing
+        self.dif = None   # for calculating difference
 
     def read_from_file(self, file_name: str):
         """
@@ -74,8 +75,10 @@ class TimeSeries:
                         minute=int(minute.group(1)))
 
         # create the missing columns in the dataframe
-        self.data['DATE (MM/DD/YYYY)'] = None
-        self.data['MST'] = None
+        # self.data['DATE (MM/DD/YYYY)'] = None
+        # self.data['MST'] = None
+        self.data.insert(0, "Date", None)
+        self.data.insert(1, "Time", None)
 
         """
         Assign each row data in the missing time and date columns.
@@ -83,8 +86,8 @@ class TimeSeries:
         pull exactly what it sounds like
         """
         for i in range(len(self.data)):
-            self.data['DATE (MM/DD/YYYY)'][i] = date.date()
-            self.data['MST'][i] = date.time()
+            self.data.at[i, self.data.columns[0]] = date.date()
+            self.data.at[i, self.data.columns[1]] = date.time()
             date += timedelta(hours=int(increment))
 
         print(self.data)
@@ -120,3 +123,10 @@ class TimeSeries:
 
         self.temp = self.data.fillna(method='ffill')
         self.data = self.temp
+
+    def difference(self):
+        """
+        Calculate the difference between data rows
+        """
+
+        self.dif = self.data.copy()
