@@ -122,9 +122,11 @@ class TimeSeries:
         Fills data to the right to NaNs
         """
 
-        self.temp = self.data.fillna(method='ffill')
+        self.temp = self.data.fillna(method='bfill')
         self.data = self.temp
 
+
+    
 
     def difference(self):
         """
@@ -138,3 +140,28 @@ class TimeSeries:
             self.data[self.data.columns[data_index]].shift(-1)
         print(temp)
         return temp
+
+    def impute_outliers(self):
+        """
+        Find and remove outlies from dataframe
+        Referenced: https://stackoverflow.com/questions/23199796/
+        detect-and-exclude-outliers-in-pandas-data-frame
+        """
+
+        temp = self.data.copy()
+
+
+        data_index = len(self.data.columns) - 1
+        # # print(data_index)
+        # q_low = df[temp.columns[data_index]].quantile(.01)
+        # q_high = df[temp.columns[data_index]].quantile(.99)
+        # df = df[(df[temp.columns[data_index]] < q_high) &
+        #         (df[temp.columns[data_index]] > q_low)]
+        # # print(q_low, q_high)
+        # df.head(100)
+
+        q_low = self.data[self.data.columns[data_index]].quantile(.01)
+        q_high = self.data[self.data.columns[data_index]].quantile(.99)
+        self.data = self.data[(self.data[temp.columns[data_index]] < q_high) &
+                        (self.data[temp.columns[data_index]] > q_low)]
+        print(self.data)
