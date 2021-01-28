@@ -113,7 +113,10 @@ class TimeSeries:
         this by calling cubic_root
         """
 
-        pass
+        self.impute_missing()
+        self.denoise()
+
+        return self.data
 
     def impute_missing(self):
         """
@@ -152,13 +155,6 @@ class TimeSeries:
 
 
         data_index = len(self.data.columns) - 1
-        # # print(data_index)
-        # q_low = df[temp.columns[data_index]].quantile(.01)
-        # q_high = df[temp.columns[data_index]].quantile(.99)
-        # df = df[(df[temp.columns[data_index]] < q_high) &
-        #         (df[temp.columns[data_index]] > q_low)]
-        # # print(q_low, q_high)
-        # df.head(100)
 
         q_low = self.data[self.data.columns[data_index]].quantile(.01)
         q_high = self.data[self.data.columns[data_index]].quantile(.99)
