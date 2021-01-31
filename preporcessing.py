@@ -12,9 +12,9 @@ import janitor  # need to install
 
 class TimeSeries:
 
-    def __init__(self, df = None):
+    def __init__(self, df=None):
         self.data = None  # holds data from initial csv read
-        if df:
+        if type(df) == pd.core.frame.DataFrame:
             self.data = df
         # self.clipped = None  # holds data from a clipped interval
         # self.temp = None  # for impute missing
@@ -105,9 +105,9 @@ class TimeSeries:
         """
 
         first_date = self.data.columns[0]  # copy the date header from csv
-        self.clipped = self.data.filter_date(first_date, starting_date, final_date)
-        print(self.clipped.head())
-        return self.clipped
+        clipped = self.data.filter_date(first_date, starting_date, final_date)
+        print(clipped.head())
+        return TimeSeries(clipped)
 
     def denoise(self):
         """
@@ -118,7 +118,7 @@ class TimeSeries:
         self.impute_missing()
         self.denoise()
 
-        return self.data
+        return TimeSeries(self.data)
 
     def impute_missing(self):
         """
@@ -144,7 +144,7 @@ class TimeSeries:
             self.data[self.data.columns[data_index]] - \
             self.data[self.data.columns[data_index]].shift(-1)
         print(temp)
-        return temp
+        return TimeSeries(temp)
 
     def impute_outliers(self):
         """
@@ -195,4 +195,4 @@ class TimeSeries:
                 ret = temp
         print(ret)
 
-        return ret
+        return TimeSeries(ret)
