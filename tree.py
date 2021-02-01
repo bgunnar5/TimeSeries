@@ -12,9 +12,6 @@ from copy import deepcopy
 from queue import Queue
 import preporcessing
 
-test_func(DummyClass.seta, DummyClass.geta)
-
-
 class OP_TYPE:
     INPUT_DATA = 0
     OUTPUT_DATA = 1
@@ -32,7 +29,7 @@ class CompatibilityError(Exception):
     pass
 
 class Node:
-    def __init__(self, operator, parent=None: Node, tag="": str, args=[]: list, save_result=False: bool, pass_result=True, children=[]: list):
+    def __init__(self, operator, parent=None, tag="", args=[], save_result=False, pass_result=True, children=[]):
         # Operator function applied to input data
         self.operator = operator
         # Tag used to identify node
@@ -65,7 +62,7 @@ class TransformationTree:
         self.root.children = children
 
     def execute_tree(self):
-    """ Executes full tree """
+        """ Executes full tree """
         q = Queue()
         q.put(self.root, None)
         while q.not_empty():
@@ -140,7 +137,7 @@ class TransformationTree:
                 q.put(child)
         return result
 
-    def add_operator(self, operator, parent_node, tag="": str, args=[]: list, save_result=False: bool):
+    def add_operator(self, operator, parent_node, tag="", args=[], save_result=False):
         """ Add operator to tree """
         new_node = Node(operator, parent=parent_node, tag=tag, args=args, save_result=save_result)
         """
@@ -165,7 +162,7 @@ class TransformationTree:
         return node
 
     def replicate_subtree(self, start_node, tag_modifier="_copy"):
-        parent_node = = start_node.parent
+        parent_node = start_node.parent
         start_node.parent = None
         replicated = deepcopy(start_node)
         self._modify_tags(replicated, tag_modifier)
