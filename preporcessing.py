@@ -12,11 +12,13 @@ import janitor  # need to install
 
 class TimeSeries:
 
-    def __init__(self):
+    def __init__(self, df=None):
         self.data = None  # holds data from initial csv read
-        self.clipped = None  # holds data from a clipped interval
-        self.temp = None  # for impute missing
-        self.dif = None   # for calculating difference
+        if type(df) == pd.core.frame.DataFrame:
+            self.data = df
+        # self.clipped = None  # holds data from a clipped interval
+        # self.temp = None  # for impute missing
+        # self.dif = None   # for calculating difference
 
     def read_from_file(self, file_name: str):
         """
@@ -103,9 +105,9 @@ class TimeSeries:
         """
 
         first_date = self.data.columns[0]  # copy the date header from csv
-        self.clipped = self.data.filter_date(first_date, starting_date, final_date)
-        print(self.clipped.head())
-        return self.clipped
+        clipped = self.data.filter_date(first_date, starting_date, final_date)
+        print(clipped.head())
+        return TimeSeries(clipped)
 
     def denoise(self):
         """
@@ -116,7 +118,7 @@ class TimeSeries:
         self.impute_missing()
         self.denoise()
 
-        return self.data
+        return TimeSeries(self.data)
 
     def impute_missing(self):
         """
@@ -125,8 +127,8 @@ class TimeSeries:
         Fills data to the right to NaNs
         """
 
-        self.temp = self.data.fillna(method='bfill')
-        self.data = self.temp
+        temp = self.data.fillna(method='bfill')
+        self.data = temp
 
 
     
@@ -142,7 +144,7 @@ class TimeSeries:
             self.data[self.data.columns[data_index]] - \
             self.data[self.data.columns[data_index]].shift(-1)
         print(temp)
-        return temp
+        return TimeSeries(temp)
 
     def impute_outliers(self):
         """
@@ -161,3 +163,36 @@ class TimeSeries:
         self.data = self.data[(self.data[temp.columns[data_index]] < q_high) &
                         (self.data[temp.columns[data_index]] > q_low)]
         print(self.data)
+
+    def longest_continuous_run(self):
+        """
+        This method finds the longest continuous run in a dataframe.
+        A continuous run can be defined as rows that don't have
+        any missing information (NaNs).
+        df = dataframe
+        :return: longest continuous run dataframe
+        """
+
+        temp = self.data.isna()  # find NaNs in df
+        runs = []   # holds index of NaNs
+        data_index = len(self.data.columns) - 1
+        for i in range(len(temp)):
+            if temp.at[i, temp.columns[data_index]] == True:
+                runs.append(i + 1)
+
+        runs.append(len(temp) + 1)  # end of file
+
+        ret = self.data.iloc[0:0]  # blank df
+        for i in range(len(runs) - 1):
+            first = runs[i]
+            last = runs[i + 1]
+            temp = self.data.iloc[first : last - 1]
+            if len(temp) > len(ret):
+                '''
+                This compares the length of the previous
+                longest run represented by a dataframe
+                '''
+                ret = temp
+        print(ret)
+
+        return TimeSeries(ret)

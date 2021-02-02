@@ -30,20 +30,23 @@ def write_to_file(data, file_name: str):
 
     data.to_csv(file_name, sep='\n', index=False)
 
-
 def main():
 
+    print("Enter file location")
+    file_location = input()
+    ts = TimeSeries()
+    ts.read_from_file(file_location)
     while(1):
-        print("Enter file location")
-        file_location = input()
-        ts = TimeSeries()
-        ts.read_from_file(file_location)
+        
         print(ts.data)
 
         print("Available commands for Time Series:")
         print("A: assign time. Adds missing time data to a time series\n",
             "W: write time series data to csv file.\n",
-            "P: print data frame\n""Enter a command")
+            "P: print data frame\n", "C: clip data in date interval\n",
+            "\nM: compute NaNs in csv file",
+            "\nD: Calculate difference in data column. ", "\nO: Remove outliers",
+            "\nL: Longest continuous run", "Enter a command")
         command = input().upper()
         if command == "A":  # assign time
             print("Enter the starting time in the format mm/dd/yyyy hr:mm")
@@ -53,6 +56,20 @@ def main():
             ts.assign_time(time, increment)
         elif command == "P":  # print data frame
             print(ts.data)
+        elif command == "C":
+            print("Enter the starting date in mm/dd/yyyy format: ", end="")
+            first = input()
+            print("\nEnter the starting date in mm/dd/yyyy format: ", end="")
+            last = input()
+            ts.clip(first, last)
+        elif command == "M":
+            ts.impute_missing()
+        elif command == "D":
+            ts.difference()
+        elif command == "O":
+            ts.impute_outliers()
+        elif command == "L":
+            ts.longest_continuous_run()
         
 
 
