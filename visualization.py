@@ -1,4 +1,3 @@
-import pandas as pd
 import matplotlib.pyplot as plt
 from preporcessing import TimeSeries
 from typing import List
@@ -36,6 +35,7 @@ def histogram(ts: TimeSeries):
 
     SIDE EFFECTS:
         - produces a histogram based on ts
+        - plots the ts
     '''
     # Create a subplot with 1 row and 2 columns (for formatting)
     fig, axes = plt.subplots(1, 2)
@@ -75,6 +75,7 @@ def normality_test(ts: TimeSeries):
 
     SIDE EFFECTS:
         - produces a quantile plot of the data from ts
+        - prints the results of the normality test by checking the p-value obtained by Shapiro-Wilkinson
     '''
     # Loop through each column in the dataframe
     for col in ts.data:
