@@ -8,7 +8,7 @@ operator_input_keys = {
     preprocessing.TimeSeries.assign_time: ["timeseries_data"],
     preprocessing.TimeSeries.clip: ["timeseries_data"],
     preprocessing.TimeSeries.assign_time: ["timeseries_data"],
-    preprocessing.TimeSeries.denoise: ["timeseries_data",
+    preprocessing.TimeSeries.denoise: ["timeseries_data"],
     preprocessing.TimeSeries.impute_missing: ["timeseries_data"],
     preprocessing.TimeSeries.difference: ["timeseries_data"],
 
