@@ -2,7 +2,6 @@
 Transformation tree allows data scientists to build and evaluate multiple pipelines
 
 Parts:
-OP_TYPE_TABLE: Stores the type of operator for each func/method
 Node: Stores individual operator along with positional and keyword args necessary to execute operator (except for data),
 along with references to parent and children nodes. Includes method to execute operator function stored in Node.
 Tree: Non-binary tree made up of Nodes. Includes methods to manipulate the tree by adding/removing/changing individual nodes, enforce
@@ -21,7 +20,7 @@ class CompatibilityError(Exception):
     pass
 
 class Node:
-    def __init__(self, operator, parent=None, tag="", args=[], save_result=False, pass_result=True):
+    def __init__(self, operator, parent=None, tag="", args=[], save_result=False):
         # Operator function applied to input data
         self.operator = operator
         # Tag used to identify node
@@ -34,18 +33,10 @@ class Node:
         self.children = []
         # Whether or not the result of executing the stored operater is added to the self.results list in the TransformationTree object
         self.save_result = save_result
-        """ 
-        self.pass_result dictates whether this node's children apply their operators to the result of executing this node's operator (pass_result = True), or
-        to the same data this node was given (pass_result = False)
-        """
-        self.pass_result = pass_result
     
-    def apply_operator(self, data=None):
+    def apply_operator(self, dynamic_data: list):
         """ Applies stored operator and args to given data, returning the result """
-        if data is not None:
-            return self.operator(data, *self.args)
-        else:
-            return self.operator(*self.args)
+        return self.operator(*dynamic_data, *self.args)
 
     def __str__(self):
         op_string = str(self.operator).split()[1]
@@ -62,28 +53,51 @@ class Node:
             return f"Node({op_string})"
 
 class TransformationTree:
-    def __init__(self, branches=[]):
+    def __init__(self, input_keys, output_keys, branches=[]):
         self.results = []
-        self.root = Node(root_func, tag="root")
+        self.root = Node(preprocessing.TimeSeries, tag="root")
         self.root.children = branches
+        self.input_keys = input_keys
+        self.output_keys = output_keys
+
+    def _execute(self, path=None):
+        """
+        Generic tree execution method called by self.execute_tree and self.execute_path.
+        Modifies self.results
+
+        Args:
+            path (list, optional): List of nodes in path to execute. If None whole tree will be executed. Defaults to None.
+        """
+        self.results = []
+        q = Queue()
+        q.put((self.root, {}))
+        while not q.empty():
+            node, branch_dict = q.get()
+            dynamic_values = []
+            # Getting dynamic values from branch dict
+            for key in self.input_keys[node.operater]:
+                if key in branch_dict:
+                    dynamic_values.append(branch_dict[key])
+            # Checking if all the required input data was created by previous operators
+            if len(self.input_keys[node.operater]) == len(dynamic_values):
+                result = node.apply_operator(dynamic_values)
+                # Optionally saving the returned result to a list that can be viewed after tree execution
+                if node.save_result:
+                    self.results.append((result, node))
+                # Making result iterable
+                if type(result) != list and type(result) != tuple:
+                    result = (result)
+                # If the correct amount of data was returned, update the branch_dict and add node's children to queue
+                if len(result) == len(self.output_keys[node.operator]):
+                    for key, value in zip(self.output_keys[node.operator], result):
+                        branch_dict[key] = value
+                    for child in node.children:
+                        if path is None or child in path:
+                            q.put((child, deepcopy(branch_dict)))   
 
     def execute_tree(self):
         """ Executes full tree """
-        self.results = []
-        q = Queue()
-        q.put((self.root, None))
-        while not q.empty():
-            node, data = q.get()
-            if data is not None:
-                result = node.apply_operator(data=data)
-            else:
-                result = node.apply_operator()
-            if node.save_result:
-                self.results.append((result, node))
-            if node.pass_result:
-                data = result
-            for child in node.children:
-                q.put((child, deepcopy(data)))
+        self._execute(path=None)
 
     def execute_path(self, end_node):
         """ Executes a path in the tree. End node denotes the last node in the path """
@@ -91,24 +105,10 @@ class TransformationTree:
         # Finding the path
         path = [end_node]
         current_node = end_node.parent
-        while current_node != self.root:
+        while current_node != self.root.parent:
             path.append(current_node)
             current_node = current_node.parent
-        path.reverse()
-
-        # Executing the path
-        q = Queue()
-        q.put((self.root, None))
-        data = None
-        for node in path:
-            if data is not None:
-                result = node.apply_operator(data=data)
-            else:
-                result = node.apply_operator()
-            if node.save_result:
-                self.results.append((result, node))
-            if result is not None:
-                data = result
+        self._execute(path=path)
 
     def get_nodes_by_tag(self, tag):
         """ Find all nodes in the tree with the given operator and return a list. """
@@ -144,12 +144,31 @@ class TransformationTree:
                 q.put(child)
         return result
 
-    def add_operator(self, operator, parent_node, tag="", args=[], save_result=False, pass_result=True, enforce_comptability=True):
+    def add_operator(self, operator, parent_node, tag="", args=[], save_result=False):
         """ Add operator to tree """
-        new_node = Node(operator, parent=parent_node, tag=tag, args=args, save_result=save_result, pass_result=True)
-        if enforce_comptability and not self._check_compatibility(parent_node, new_node):
+        new_node = Node(operator, parent=parent_node, tag=tag, args=args, save_result=save_result)
+        if not self._check_compatibility(parent_node, new_node):
             raise CompatibilityError()
         parent_node.children.append(new_node)
+        return new_node
+
+    def replace_operator(self, operator, node, tag="", args=[], save_result=False):
+        new_node = self.add_operator(operator, node.parent_node, tag=tag, args=args, save_result=save_result)
+        # At this point the new_node and the old node (node) are both children of node.parent
+        # We need to remove one of them later in the function depending on if the children are compatible with new_node
+        compatible_with_children = True
+        for child in node.children:
+            if not self._check_compatibility(child, new_node):
+                compatible_with_children = False
+                break
+        if compatible_with_children:
+            # Transferring children to new_node
+            for child in node.children:
+                child.parent = new_node
+                new_node.children.append(child)
+            node.parent.children.remove(node)
+        else:
+            node.parent.children.remove(new_node)
         return new_node
     
 
@@ -193,14 +212,8 @@ class TransformationTree:
         return replica
 
     def _copy_node(self, node):
-        node_parent = node.parent
-        node_children = node.children
-        node.parent = None
-        node.children = []
-        node_copy = deepcopy(node)
-        node.parent = node_parent
-        node.children = node_children
-        return node_copy
+        return Node(node.operator, tag=node.tag, args=node.args, save_result=node.save_result)
+        
 
     def _modify_tags(self, subtree_root, modifier):
         """
@@ -219,49 +232,28 @@ class TransformationTree:
             for child in node.children:
                 q.put(child)
 
-    def _get_inherited_data_type(self, node):
-        """
-        Starting with a given Node (node), go up the tree looking for the first node with node.pass_result == True,
-        and then look up the return type(s) of the function in the given.
-
-        Args:
-            node (Node): First node we check
-
-        Raises:
-            Exception: If the output_type_table has insufficient information
-
-        Returns:
-            [type]: [description]
-        """
-        inherited_data_type = (None)
-        current_node = node
-        # Looking for the first node with pass_result arg == True
-        while current_node != self.root:
-            if current_node.pass_result == True:
-                inherited_data_type = self.output_type_table.get(current_node.operator)
-                if inherited_data_type is None:
-                    raise Exception('Operator: {current_node.operator} is not listed in the output type table')
-                break
-            else:
-                current_node = current_node.parent
-        return inherited_data_type
-
-    def _check_compatibility(self, new_operator, parent_node):
+    def _check_compatibility(self, new_node, parent_node):
         """ 
-        Checks if the required input for the new operator matches the 
+        Checks if the required input for the new node's operator matches the 
         expected data types that will be passed to the new operator by the previous nodes
         in the tree branch
         """ 
-        expected_input_types = self.input_type_table.get(new_operator)
-        if expected_input_types is None:
-            raise Exception('Operator: {new_operator} is not listed in the input type table')
-        expected_inherited_types = self._get_inherited_data_type(parent_node)
-        return expected_inherited_types == expected_input_types
+        required_input_keys = self.input_keys[new_node.operator]
+        branch_key_set = set()
+        current_node = parent_node
+        while current_node != self.root.parent:
+            operator_output_keys = self.output_keys[current_node.operator]
+            for key in operator_output_keys:
+                branch_key_set.add(key)
+        for key in required_input_keys:
+            if key not in branch_key_set:
+                return False
+        return True
 
     def get_path_str(self, end_node):
         node_strs = []
         current_node = end_node
-        while current_node != self.root:
+        while current_node != self.root.parent:
             node_strs.append(str(current_node))
             current_node = current_node.parent
         node_strs.reverse()
@@ -284,18 +276,20 @@ def load_tree(filename):
     except:
         return False
 
-def root_func():
-    """ Filler function stored in root node """
-    return None
+class Pipeline:
+    def __init__(tree: TransformationTree, pipeline_end_node: Node):
+        pass
+        
 
-def test()
+def f1():
+    return 5
+def f2(a, multiplier):
+    return a*multiplier
+def f3(c):
+    return 3*c
+
+def test():
     """ Function used to test functionality, will remove in final version """
-    def f1():
-        return 5
-    def f2(a, multiplier):
-        return a*multiplier
-    def f3(c):
-        return 3*c
 
 
     filename = 'finalized_tree.sav'
@@ -328,5 +322,3 @@ def test()
     print("Executing loaded tree and printing results")
     loaded_tree.execute_path(third)
     print(loaded_tree.results)
-
-test()
