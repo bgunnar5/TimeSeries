@@ -8,9 +8,9 @@ operator_input_keys = {
     preprocessing.TimeSeries.assign_time: ["timeseries_data"],
     preprocessing.TimeSeries.clip: ["timeseries_data"],
     preprocessing.TimeSeries.assign_time: ["timeseries_data"],
-    preprocessing.TimeSeries.denoise: [],
-    preprocessing.TimeSeries.impute_missing: [],
-    preprocessing.TimeSeries.difference: [],
+    preprocessing.TimeSeries.denoise: ["timeseries_data",
+    preprocessing.TimeSeries.impute_missing: ["timeseries_data"],
+    preprocessing.TimeSeries.difference: ["timeseries_data"],
 
     mf.train_test_split: [] #TODO
     mf.mlp_model: [], # TODO
