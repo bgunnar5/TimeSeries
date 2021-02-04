@@ -3,9 +3,11 @@ File that holds all the preprocessing methods
 """
 
 import pandas as pd
+import csv
 import matplotlib.pyplot as plt
 from datetime import date
 from datetime import datetime, date, timedelta
+import numpy as np
 import re
 import janitor  # need to install
 
@@ -130,9 +132,6 @@ class TimeSeries:
         temp = self.data.fillna(method='bfill')
         self.data = temp
 
-
-    
-
     def difference(self):
         """
         Calculate the difference between data rows
@@ -196,3 +195,74 @@ class TimeSeries:
         print(ret)
 
         return TimeSeries(ret)
+
+    def scaling(self):
+        """
+        Produces a time series whose magnitudes are scaled so that the resulting
+        magnitudes range in the interval [0,1].
+        """
+        df = pd.DataFrame(self.data)    # self.data could be any data type
+        df_sca = (df - df.min()) / (df.max() - df.min())
+        print(df_sca)
+
+    def standardize(self):
+        """
+        Produces a time series whose mean is 0 and variance is 1.
+        """
+        df = pd.DataFrame(self.data)
+        df_stand = df   # (df - 0)/sqrt(1)
+        print(df_stand)
+
+    def logarithm(self):
+        """
+        Produces a time series whose elements are the logarithm of the original
+        elements.
+        """
+        # Create a copy of the current DataFrame
+        new_df = self.data.copy()
+
+        # Loop through the columns in the DataFrame
+        for col in new_df:
+            # If the column contains floats or integers we can take the logarithm and store it
+            if new_df[col].dtype == 'float64' or new_df[col].dtype == 'int64':
+                new_df[col] = np.log10(new_df[col])
+
+        # Return our new DataFrame
+        return new_df
+
+    def cubic_root(self):
+        """
+        Produces a time series whose elements are the original elements’ cubic root.
+        """
+        # Create a copy of the current DataFrame
+        new_df = self.data.copy()
+
+        # Loop through the columns in the DataFrame
+        for col in new_df:
+            # If the column contains floats or integers we can take the cubic root and store it
+            if new_df[col].dtype == 'float64' or new_df[col].dtype == 'int64':
+                new_df[col] = new_df[col] ** (1 / 3)
+
+        # Return our new DataFrame
+        return new_df
+
+    def split_data(self, perc_training=.8, perc_valid=.1, perc_test=.1):
+        """
+        Splits a time series into training, validation, and testing according to the given percentages.
+        """
+        results = []
+        perone = perc_training
+        pertwo = perc_training + perc_valid
+        perthree = perc_training + perc_test + perc_valid
+        with open(file_name) as csvfile:
+            array = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)  # change contents to floats
+            for row in array:  # each row is a list
+                results.append(row)
+        self.train = results[0:len(results)*perone-1]
+        self.val = results[len(results)*perc_training-1:len(results)*pertwo-1]
+        self.test = results[len(results)*pertwo:len(results)*perthree]
+
+
+'''ts = TimeSeries()
+ts.read_from_file('Project Description/Time Series Data 2/wind_cointzio_10m_complete.csv')
+ts.split_data()'''
