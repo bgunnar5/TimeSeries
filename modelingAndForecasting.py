@@ -39,6 +39,38 @@ def rf_model():
     '''
     return RandomForestClassifier()
 
+def fit(model, x_train, y_train):
+    '''
+    Wrapper function for fit methods of RandomForestClassifier and MLPClassifier objects
+
+    Parameters
+    ----------
+        - model: RandomForestClassifier or MLPClassifier object
+        - x_train: TODO
+        - y_train: TODO
+
+    Returns
+    -------
+        - RandomForestClassifier object (uses same defaults as sklearn)
+    '''
+    model.fit(x_train, y_train)
+    return model
+
+def predict(model, x_train, y_train):
+    '''
+    Wrapper function for predict methods of RandomForestClassifier and MLPClassifier objects
+
+    Parameters
+    ----------
+        - model: RandomForestClassifier or MLPClassifier object
+        - x_test: TODO
+
+    Returns
+    -------
+        - TODO
+    '''
+    return model.predict(x_test)
+    
 
 # TODO: modify to fit Yifeng's functional form
 X, y = make_classification(n_samples=100, random_state=1)
