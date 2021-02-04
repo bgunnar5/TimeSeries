@@ -14,8 +14,8 @@ operator_input_keys = {
     preprocessing.TimeSeries.difference: ["timeseries_data"],
 
     mf.train_test_split: [] #TODO,
-    mf.mlp_model: [], # TODO,
-    mf.rf_model: [], # TODO,
+    mf.mlp_model: ["input_dimension", "output_dimension", "layers"], # dimensions derived from indices of design_matrix; layers parameter optional (default 3),
+    mf.rf_model: [], # All parameters are defaulted (different than MLP),
     mf.fit: ["model", "x_train", "y_train"],
     mf.predict: ["trained_model", "x_test"],
 
