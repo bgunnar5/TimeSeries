@@ -77,3 +77,14 @@ class TimeSeries:
                 a.append(newData(i+input_index))
             matrix.append(a)
         return matrix
+    
+    
+    def ts2db(input_filename, perc_training, perc_valid, perc_test, input_index,
+              output_index, output_file_name):
+        """read the file
+            split data
+            produce a new database"""
+        read_from_file(input_filename)
+        split_data(perc_training, perc_valid, perc_test)
+        df = pd.DataFrame(self.train)
+        df.to_csv(output_file_name)
