@@ -198,9 +198,14 @@ class TimeSeries:
         Produces a time series whose magnitudes are scaled so that the resulting
         magnitudes range in the interval [0,1].
         """
-        df = pd.DataFrame(self.data)    # self.data could be any data type
-        df_sca = (df - df.min()) / (df.max() - df.min())
-        #print(df_sca)
+        new_df = self.data.copy()
+
+        # Loop through the columns in the DataFrame
+        for col in new_df:
+            # If the column contains floats or integers we can take the scaling and store it
+            if new_df[col].dtype == 'float64' or new_df[col].dtype == 'int64':
+                new_df[col] = (new_df[col] - new_df[col].min()) / (new_df[col].max() - new_df[col].min())
+        return TimeSeries(new_df)
 
     def standardize(self):
         """
