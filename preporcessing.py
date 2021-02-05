@@ -36,6 +36,8 @@ class TimeSeries:
         except FileNotFoundError:
             print(f"File {file_name} not found.")
 
+        return self
+
     def write_to_file(self, file_name: str):
         """
         Write data to a CSV file
@@ -58,7 +60,6 @@ class TimeSeries:
         :param increment: the time interval
         :type increment: int
         """
-
         month_reg = r"^([0-9]{2})"  # matches the month
         day_reg = r"\/([0-9]{2})\/"  # matches the day
         year_reg = r"\/([0-9]{4})"  # matches the year
@@ -91,7 +92,7 @@ class TimeSeries:
             self.data.at[i, self.data.columns[1]] = date.time()
             date += timedelta(hours=int(increment))
 
-        print(self.data)
+        #print(self.data)
 
     def clip(self, starting_date,  final_date):
         """
@@ -138,7 +139,7 @@ class TimeSeries:
         temp[temp.columns[data_index]] = \
             self.data[self.data.columns[data_index]] - \
             self.data[self.data.columns[data_index]].shift(-1)
-        print(temp)
+        #print(temp)
         return TimeSeries(temp)
 
     def impute_outliers(self):
@@ -254,11 +255,11 @@ class TimeSeries:
         varList = []
         for index in array:
             timeList.append(index[0])
-            varList.append(index[1])
+            varList.append(index[-1])
         self.train = varList[0:int(len(array) * perc_training) - 1]
         self.val = varList[int(len(array) * perc_training):int(len(array) * perc_valid) - 1]
         self.test = varList[int(len(array) * perc_valid):int(len(array) * perc_test) - 1]
-
+    """
     def design_matrix(self, input_index=0, output_index=25):
         trainingData = self.train
         trainingMatrix = []
@@ -287,6 +288,35 @@ class TimeSeries:
                 j+=1
             y_test.append(testData[i+j])
             testMatrix.append([X_test,y_test])
+        return trainingMatrix, testMatrix
+    """
+    def design_matrix(self, input_index=0, output_index=25):
+        x_train, y_train = [],[]
+        x_start = 0
+        x_end = input_index + x_start
+        y_start = x_end
+        y_end = output_index + y_start
+        while y_end <= len(self.train):
+            x_train.append(self.train[x_start:x_end])
+            y_train.append(self.train[y_start:y_end])
+            x_start += 1
+            x_end += 1
+            y_start += 1
+            y_end += 1
+
+        x_test, y_test = [],[]
+        x_start = 0
+        x_end = input_index + x_start
+        y_start = x_end
+        y_end = output_index + y_start
+        while y_end <= len(self.test):
+            x_test.append(self.test[x_start:x_end])
+            y_test.append(self.test[y_start:y_end])
+            x_start += 1
+            x_end += 1
+            y_start += 1
+            y_end += 1
+        return (x_train, y_train), (x_test, y_test)
 
     def ts2db(self, input_file_name, perc_training, perc_valid, perc_test, input_index,
               output_index, output_file_name):
@@ -297,9 +327,8 @@ class TimeSeries:
             self.read_from_file(input_file_name)
 
         self.split_data(perc_training, perc_valid, perc_test)
-        trainingMatrix, testMatrix = self.design_matrix()
-
-        x_train, y_train = zip(*trainingMatrix)
-        x_test, y_test = zip(*testMatrix)
+        trainingMatrix, testMatrix = self.design_matrix(input_index=input_index, output_index=output_index)
+        x_train, y_train = trainingMatrix[0], trainingMatrix[1]
+        x_test, y_test = testMatrix[0], testMatrix[1]
 
         return x_train, y_train, x_test, y_test

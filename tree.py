@@ -31,7 +31,7 @@ class Node:
         self.parent = parent
         # list of children nodes
         self.children = []
-        # Whether or not the result of executing the stored operater is added to the self.results list in the TransformationTree object
+        # Whether or not the result of executing the stored operator is added to the self.results list in the TransformationTree object
         self.save_result = save_result
     
     def apply_operator(self, dynamic_data: list):
@@ -75,18 +75,18 @@ class TransformationTree:
             node, branch_dict = q.get()
             dynamic_values = []
             # Getting dynamic values from branch dict
-            for key in self.input_keys[node.operater]:
+            for key in self.input_keys[node.operator]:
                 if key in branch_dict:
                     dynamic_values.append(branch_dict[key])
             # Checking if all the required input data was created by previous operators
-            if len(self.input_keys[node.operater]) == len(dynamic_values):
+            if len(self.input_keys[node.operator]) == len(dynamic_values):
                 result = node.apply_operator(dynamic_values)
                 # Optionally saving the returned result to a list that can be viewed after tree execution
                 if node.save_result:
                     self.results.append((result, node))
                 # Making result iterable
                 if type(result) != list and type(result) != tuple:
-                    result = (result)
+                    result = (result,)
                 # If the correct amount of data was returned, update the branch_dict and add node's children to queue
                 if len(result) == len(self.output_keys[node.operator]):
                     for key, value in zip(self.output_keys[node.operator], result):
@@ -121,7 +121,7 @@ class TransformationTree:
     def _get_nodes(self, value, mode: str):
         """ 
         Generic tree search method that finds Nodes in the tree with a given value.
-        Used by self.get_nodes_by_tag and self.get_nodes_by_operater.
+        Used by self.get_nodes_by_tag and self.get_nodes_by_operator.
 
         Positional arguments:
         value -- the value the function checks for
@@ -147,8 +147,10 @@ class TransformationTree:
     def add_operator(self, operator, parent_node, tag="", args=[], save_result=False):
         """ Add operator to tree """
         new_node = Node(operator, parent=parent_node, tag=tag, args=args, save_result=save_result)
+        """
         if not self._check_compatibility(parent_node, new_node):
             raise CompatibilityError()
+        """
         parent_node.children.append(new_node)
         return new_node
 
