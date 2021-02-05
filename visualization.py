@@ -110,12 +110,11 @@ def mse(y_test: List, y_forecast: List) -> float:
         - y_forecast: our forecasting model data (represented as a list)
     '''
     # Initialize a result variable
-    print(type(y_test), type(y_forecast))
+    
     result = 0
 
     # Calculate n
     n = len(y_forecast)
-
     # Loop through every data point in y_forecast and y_test
     for i in range(n):
         # Compute the difference between the actual data and our forecasting model
@@ -125,7 +124,6 @@ def mse(y_test: List, y_forecast: List) -> float:
 
     # Final multiplication step
     result *= (1 / n)
-    print(type(result))
     if len(result) == 1:
         result = result[0]
     return result

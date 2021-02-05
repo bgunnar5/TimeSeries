@@ -105,7 +105,7 @@ class TimeSeries:
 
         first_date = self.data.columns[0]  # copy the date header from csv
         clipped = self.data.filter_date(first_date, starting_date, final_date)
-        print(clipped.head())
+        #print(clipped.head())
         return TimeSeries(clipped)
 
     def denoise(self):
@@ -158,7 +158,7 @@ class TimeSeries:
         q_high = self.data[self.data.columns[data_index]].quantile(.99)
         self.data = self.data[(self.data[temp.columns[data_index]] < q_high) &
                         (self.data[temp.columns[data_index]] > q_low)]
-        print(self.data)
+        #print(self.data)
 
     def longest_continuous_run(self):
         """
@@ -189,7 +189,7 @@ class TimeSeries:
                 longest run represented by a dataframe
                 '''
                 ret = temp
-        print(ret)
+        #print(ret)
 
         return TimeSeries(ret)
 
@@ -200,7 +200,7 @@ class TimeSeries:
         """
         df = pd.DataFrame(self.data)    # self.data could be any data type
         df_sca = (df - df.min()) / (df.max() - df.min())
-        print(df_sca)
+        #print(df_sca)
 
     def standardize(self):
         """
@@ -208,7 +208,7 @@ class TimeSeries:
         """
         df = pd.DataFrame(self.data)
         df_stand = df   # (df - 0)/sqrt(1)
-        print(df_stand)
+        #print(df_stand)
 
     def logarithm(self):
         """

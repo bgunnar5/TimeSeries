@@ -1,10 +1,11 @@
-from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from preporcessing import TimeSeries
+import numpy as np
 
-def mlp_model(input_dimension, output_dimenstion, layers=5):
+def mlp_model():
     '''
     Wrapper function for multilayer perceptron model.
 
@@ -21,8 +22,9 @@ def mlp_model(input_dimension, output_dimenstion, layers=5):
         - MLPClassifier object (uses same defaults as sklearn, but hidden_layer_sizes specified from
                                 input and output dimensions)
     '''
-    network = [input_dimension] * (layers - 2)
-    return MLPClassifier(hidden_layer_sizes=network)
+    #network = [input_dimension] * (layers - 2)
+    # MLPRegressor(hidden_layer_sizes=network)
+    return MLPRegressor()
 
 
 def rf_model():
@@ -37,7 +39,7 @@ def rf_model():
     -------
         - RandomForestClassifier object (uses same defaults as sklearn)
     '''
-    return RandomForestClassifier()
+    return RandomForestRegressor()
 
 def fit(model, x_train, y_train):
     '''
@@ -53,7 +55,8 @@ def fit(model, x_train, y_train):
     -------
         - RandomForestClassifier object (uses same defaults as sklearn)
     '''
-    model.fit(x_train, y_train)
+    y_train_array = np.ravel(y_train)
+    model.fit(x_train, y_train_array)
     return model
 
 def predict(model, X):
@@ -69,8 +72,9 @@ def predict(model, X):
     -------
         - model.predict(X): List of predicted data values
     '''
-    return model.predict(X)
-
+    predictions = model.predict(X)
+    return predictions
+"""
 ts = TimeSeries()
 filename = 'Project Description/Time Series Data 2/wind_cointzio_10m_complete.csv'
 input_index, output_index, X_train, y_train, X_test, y_test = ts.ts2db(filename, .8, .01, .19, 0, 25, None)
@@ -98,3 +102,4 @@ rf_prediction = predict(mlp, X_test)
 
 print(mlp_prediction)
 print(rf_prediction)
+"""

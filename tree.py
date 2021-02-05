@@ -20,7 +20,7 @@ class CompatibilityError(Exception):
     pass
 
 class Node:
-    def __init__(self, operator, parent=None, tag="", args=[], save_result=False):
+    def __init__(self, operator, args, parent=None, tag="", save_result=False):
         # Operator function applied to input data
         self.operator = operator
         # Tag used to identify node
@@ -53,10 +53,10 @@ class Node:
             return f"Node({op_string})"
 
 class TransformationTree:
-    def __init__(self, input_keys, output_keys, branches=[]):
+    def __init__(self, input_keys, output_keys):
         self.results = []
-        self.root = Node(preprocessing.TimeSeries, tag="root")
-        self.root.children = branches
+        self.root = Node(preprocessing.TimeSeries,[], tag="root")
+        self.root.children = []
         self.input_keys = input_keys
         self.output_keys = output_keys
 
@@ -85,15 +85,18 @@ class TransformationTree:
                 if node.save_result:
                     self.results.append((result, node))
                 # Making result iterable
-                if type(result) != list and type(result) != tuple:
-                    result = (result,)
+                if result is None:
+                    result = []
+                elif type(result) != list and type(result) != tuple:
+                    result = [result]
                 # If the correct amount of data was returned, update the branch_dict and add node's children to queue
                 if len(result) == len(self.output_keys[node.operator]):
                     for key, value in zip(self.output_keys[node.operator], result):
                         branch_dict[key] = value
                     for child in node.children:
                         if path is None or child in path:
-                            q.put((child, deepcopy(branch_dict)))   
+                            q.put((child, deepcopy(branch_dict)))
+
 
     def execute_tree(self):
         """ Executes full tree """
@@ -144,18 +147,18 @@ class TransformationTree:
                 q.put(child)
         return result
 
-    def add_operator(self, operator, parent_node, tag="", args=[], save_result=False):
+    def add_operator(self, operator, args, parent_node, tag="", save_result=False):
         """ Add operator to tree """
-        new_node = Node(operator, parent=parent_node, tag=tag, args=args, save_result=save_result)
-        """
+        new_node = Node(operator, args, parent=parent_node, tag=tag, save_result=save_result)
+        
         if not self._check_compatibility(parent_node, new_node):
             raise CompatibilityError()
-        """
+        
         parent_node.children.append(new_node)
         return new_node
 
-    def replace_operator(self, operator, node, tag="", args=[], save_result=False):
-        new_node = self.add_operator(operator, node.parent_node, tag=tag, args=args, save_result=save_result)
+    def replace_operator(self, operator,args, node, tag="", save_result=False):
+        new_node = self.add_operator(operator, args, node.parent, tag=tag, save_result=save_result)
         # At this point the new_node and the old node (node) are both children of node.parent
         # We need to remove one of them later in the function depending on if the children are compatible with new_node
         compatible_with_children = True
@@ -214,7 +217,7 @@ class TransformationTree:
         return replica
 
     def _copy_node(self, node):
-        return Node(node.operator, tag=node.tag, args=node.args, save_result=node.save_result)
+        return Node(node.operator, node.args, tag=node.tag, save_result=node.save_result)
         
 
     def _modify_tags(self, subtree_root, modifier):
@@ -247,6 +250,7 @@ class TransformationTree:
             operator_output_keys = self.output_keys[current_node.operator]
             for key in operator_output_keys:
                 branch_key_set.add(key)
+            current_node = current_node.parent
         for key in required_input_keys:
             if key not in branch_key_set:
                 return False
@@ -257,7 +261,10 @@ class TransformationTree:
         current_node = end_node
         while current_node != self.root.parent:
             node_strs.append(str(current_node))
-            current_node = current_node.parent
+            try:
+                current_node = current_node.parent
+            except:
+                print(current_node, current_node.parent)
         node_strs.reverse()
         return " -> ".join(node_strs)
 
@@ -294,45 +301,3 @@ class Pipeline:
         self.tree.execute_path(self.end_node)
         self.results = self.tree.results
         
-
-def f1():
-    return 5
-def f2(a, multiplier):
-    return a*multiplier
-def f3(c):
-    return 3*c
-
-def test():
-    """ Function used to test functionality, will remove in final version """
-
-
-    filename = 'finalized_tree.sav'
-    # Building first tree with dummy functions
-    tree = TransformationTree()
-    # Adding f1 function as first operator
-    first = tree.add_operator(f1,tree.root,tag="first", enforce_comptability=False)
-    # Adding f2 and f3 as children of f1
-    # Save_result == True means the result of executing the operator is stored in tree.results
-    tree.add_operator(f2, first, args=[2], save_result=True, tag="second", enforce_comptability=False)
-    tree.add_operator(f3, first, save_result=True, tag="third", enforce_comptability=False)
-    print("Printing paths to f2 and f3 in original tree")
-    second = tree.get_nodes_by_tag("second")[0]
-    third = tree.get_nodes_by_tag("third")[0]
-    print(tree.get_path_str(second))
-    print(tree.get_path_str(third))
-    print("Executing original tree and printing the results")
-    tree.execute_tree()
-    print(tree.results)
-
-    # Dumping tree to pickle file
-    pickle.dump(tree, open(filename, 'wb'))
-    # Loading tree from pickle file
-    loaded_tree = pickle.load(open(filename, 'rb'))
-    second = loaded_tree.get_nodes_by_tag("second")[0]
-    third = loaded_tree.get_nodes_by_tag("third")[0]
-    print("Printing paths to f2 and f3 operators in loaded tree")
-    print(loaded_tree.get_path_str(second))
-    print(loaded_tree.get_path_str(third))
-    print("Executing loaded tree and printing results")
-    loaded_tree.execute_path(third)
-    print(loaded_tree.results)
