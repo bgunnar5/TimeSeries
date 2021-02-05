@@ -49,18 +49,31 @@ class TimeSeries:
         df_cu = df**( 1.0 / 3.0)
         print(df_cu)
 
-    def split_data(self, perc_training, perc_valid, perc_test, file_name: str):
+    def split_data(self, perc_training =.8, perc_valid =.1, perc_test =.1,):
         """
         Splits a time series into training, validation, and testing according to the given percentages.
         """
         results = []
         perone = perc_training
         pertwo = perc_training + perc_valid
-        perthree = perc_training + perc_test + perc_valid
-        with open(file_name) as csvfile:
-            array = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)  # change contents to floats
-            for row in array:  # each row is a list
-                results.append(row)
-        self.train = results(0:len(results)*perone-1)
-        self.val = results(len(results)*perc_training-1:len(results)*pertwo-1)
-        self.test = results(len(results)*pertwo:len(results)*perthree)
+        perthree = perc_test + perc_training + perc_valid
+        df = pd.DataFrame(self.data)
+        array = df.values.tolist()
+        for row in array:  # each row is a list
+            results.append(row)
+        self.train = results[0:int(len(results)*perone)-1]
+        self.val = results[int(len(results)*perone):int(len(results)*pertwo)-1]
+        self.test = results[int(len(results)*pertwo):int(len(results)*perthree)-1]
+
+    def design_matrix(self, input_index, output_index):
+        df = pd.DataFrame(self.data)
+        newData = df.select_dtypes(include=['number']).values.to_list()
+        row = len(newData)-(output_index+1)
+        col = output_index - input_index
+        matrix = []
+        for i in range(row):
+            a = []
+            for j in range(col):
+                a.append(newData(i+input_index))
+            matrix.append(a)
+        return matrix
