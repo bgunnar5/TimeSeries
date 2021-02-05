@@ -5,9 +5,10 @@ from scipy.stats import shapiro
 from scipy.stats import probplot
 
 
-def plot(ts_list: List[TimeSeries]):
+def plot(ts: TimeSeries):
     '''
     Plots one or more time series. The time axis is adjusted to display the data according to their time indices.
+    Changed to just ts instead of ts_list as argument because of the operatorkeys.py file.
 
     ARGS:
         - ts_list: a list of one or more time series files to be plotted. The files will be of type str.
@@ -15,14 +16,13 @@ def plot(ts_list: List[TimeSeries]):
     SIDE EFFECTS:
         - produces a plot of one or more time series
     '''
-    # Loop through every ts in the list
-    for ts in ts_list:
-        # Plot the ts data
-        ts.data.plot()
 
-        # Change the label of the x-axis and display the plot
-        plt.xlabel("Date")
-        plt.show()
+    # Plot the ts data
+    ts.data.plot()
+
+    # Change the label of the x-axis and display the plot
+    plt.xlabel("Date")
+    plt.show()
 
 
 def histogram(ts: TimeSeries):
