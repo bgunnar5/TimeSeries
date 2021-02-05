@@ -259,26 +259,38 @@ class TransformationTree:
         node_strs.reverse()
         return " -> ".join(node_strs)
 
-        
-def save_tree(tree, filename):
+    def export_pipeline(self, end_node: Node):
+        pip = Pipeline(self, end_node)
+        return pip
+
+
+# Save works for both trees and pipelines so we use the argument name 'object'
+def save(object, filename):
     try:
-        pickle.dump(tree, open(filename, 'wb'))
+        pickle.dump(object, open(filename, 'wb'))
         status = True
     except:
         status = False
     return status
 
-
-def load_tree(filename):
+# Load works for both trees and pipelines so we use the variable name 'loaded_object'
+def load(filename):
     try:
-        loaded_tree = pickle.load(open(filename, 'rb'))
-        return loaded_tree
+        loaded_object = pickle.load(open(filename, 'rb'))
+        return loaded_object
     except:
         return False
 
+
 class Pipeline:
-    def __init__(tree: TransformationTree, pipeline_end_node: Node):
-        pass
+    def __init__(self, tree: TransformationTree, pipeline_end_node: Node):
+        self.tree = tree
+        self.end_node = pipeline_end_node
+        self.results = None
+
+    def run_path(self):
+        self.tree.execute_path(self.end_node)
+        self.results = self.tree.results
         
 
 def f1():
