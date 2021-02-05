@@ -2,9 +2,9 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-# from Yifeng's file import split_data, design_matrix
+from preporcessing import TimeSeries
 
-def mlp_model(input_dimension=25, output_dimenstion=25, layers=5):
+def mlp_model(input_dimension, output_dimenstion, layers=5):
     '''
     Wrapper function for multilayer perceptron model.
 
@@ -56,41 +56,45 @@ def fit(model, x_train, y_train):
     model.fit(x_train, y_train)
     return model
 
-def predict(model, x_train, y_train):
+def predict(model, X):
     '''
     Wrapper function for predict methods of RandomForestClassifier and MLPClassifier objects
 
     Parameters
     ----------
         - model: RandomForestClassifier or MLPClassifier object
-        - x_test: TODO
+        - X: State of data beginning at input_index from design_matrix
 
     Returns
     -------
-        - TODO
+        - model.predict(X): List of predicted data values
     '''
-    return model.predict(x_test)
-    
+    return model.predict(X)
+
+ts = TimeSeries()
+filename = 'Project Description/Time Series Data 2/wind_cointzio_10m_complete.csv'
+input_index, output_index, X_train, y_train, X_test, y_test = ts.ts2db(filename, .8, .01, .19, 0, 25, None)
+
 
 # TODO: modify to fit Yifeng's functional form
-X, y = make_classification(n_samples=100, random_state=1)
-X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                    random_state=1)
-
+# X, y = make_classification(n_samples=100, random_state=1)
+# input_index, output_index, X_train, X_test, y_train, y_test = train_test_split(X, y,
+#                                                     random_state=1)
 
 ### EXAMPLE: ###
+mlpDimension = output_index - input_index
 
 # Classify the models:
-mlp = mlp_model()
+mlp = mlp_model(mlpDimension, mlpDimension)
 rf = rf_model()
 
 # Create a fit using builtin method
-mlp.fit(X_train, y_train)
-rf.fit(X_train, y_train)
+fit(mlp, X_train, y_train)
+fit(rf, X_train, y_train)
 
 # Forecast using builtin method
-mlp_prediction = mlp.predict(X_test)
-rf_prediction = rf.predict(X_test)
+mlp_prediction = predict(mlp, X_test)
+rf_prediction = predict(mlp, X_test)
 
 print(mlp_prediction)
 print(rf_prediction)
