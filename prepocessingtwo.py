@@ -49,34 +49,49 @@ class TimeSeries:
         df_cu = df**( 1.0 / 3.0)
         print(df_cu)
 
-    def split_data(self, perc_training =.8, perc_valid =.1, perc_test =.1,):
+    def split_data(self, perc_training =.8, perc_valid =.01, perc_test =.1,):
         """
         Splits a time series into training, validation, and testing according to the given percentages.
         """
-        results = []
-        perone = perc_training
-        pertwo = perc_training + perc_valid
-        perthree = perc_test + perc_training + perc_valid
+        perc_valid += perc_training
+        perc_test += perc_valid
         df = pd.DataFrame(self.data)
         array = df.values.tolist()
-        for row in array:  # each row is a list
-            results.append(row)
-        self.train = results[0:int(len(results)*perone)-1]
-        self.val = results[int(len(results)*perone):int(len(results)*pertwo)-1]
-        self.test = results[int(len(results)*pertwo):int(len(results)*perthree)-1]
+        timeList = []
+        varList = []
+        for index in array:
+            timeList.append(index[0])
+            varList.append(index[1])
+        self.train = varList[0:int(len(array)*perc_training)-1]
+        self.val = varList[int(len(array)*perc_training):int(len(array)*perc_valid)-1]
+        self.test = varList[int(len(array)*perc_valid):int(len(array)*perc_test)-1]
 
-    def design_matrix(self, input_index, output_index):
-        df = pd.DataFrame(self.data)
-        newData = df.select_dtypes(include=['number']).values.to_list()
-        row = len(newData)-(output_index+1)
-        col = output_index - input_index
-        matrix = []
-        for i in range(row):
-            a = []
-            for j in range(col):
-                a.append(newData(i+input_index))
-            matrix.append(a)
-        return matrix
+    def design_matrix(self, input_index=0, output_index=25):
+        trainingData = self.train
+        X_train = ()
+        y_train = ()
+        trainingMatrix = []
+        for i in range(len(trainingData)):
+            j = 0
+            while j < output_index:
+                X_train.append(trainingData[i+j])
+                j+=1
+            y_train.append(trainingData[i+j])
+            matrix.append([X_train,y_train])
+
+        testData = self.test
+        X_test = ()
+        y_test = ()
+        testMatrix = []
+        for i in range(len(testData)):
+            j = 0
+            while j < output_index:
+                X_train.append(trainingData[i+j])
+                j+=1
+            y_train.append(testData[i+j])
+            matrix.append([X_test,y_test])
+            
+        return trainingMatrix, testMatrix
     
     
     def ts2db(input_filename, perc_training, perc_valid, perc_test, input_index,
