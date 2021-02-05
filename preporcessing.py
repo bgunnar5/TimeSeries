@@ -266,11 +266,13 @@ class TimeSeries:
             j = 0
             X_train = []
             y_train = []
+            if trainingData[i] == trainingData[-1]:
+                break
             while j < output_index:
-                X_train.append(trainingData[i + j])
-                j += 1
-            y_train.append(trainingData[i + j])
-            trainingMatrix.append([X_train, y_train])
+                X_train.append(trainingData[i+j])
+                j+=1
+            y_train.append(trainingData[i+j])
+            trainingMatrix.append([X_train,y_train])
 
         testData = self.test
         testMatrix = []
@@ -278,13 +280,13 @@ class TimeSeries:
             j = 0
             X_test = []
             y_test = []
+            if testData[i] == testData[-1]:
+                break
             while j < output_index:
-                X_test.append(trainingData[i + j])
-                j += 1
-            y_test.append(testData[i + j])
-            testMatrix.append([X_test, y_test])
-
-        return trainingMatrix, testMatrix
+                X_test.append(testData[i+j])
+                j+=1
+            y_test.append(testData[i+j])
+            testMatrix.append([X_test,y_test])
 
     def ts2db(self, input_file_name, perc_training, perc_valid, perc_test, input_index,
               output_index, output_file_name):
