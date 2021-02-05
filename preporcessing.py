@@ -50,13 +50,10 @@ class TimeSeries:
         """
          If a csv file does not include a date section, this method adds it. 
         Accomplished by iterating over all rows and adding the date
-
         Expected input: 01/23/2021 12:30 (mm/dd/yyyy hh:mm)
-
         Use regex to extract date information to create a datetime object
         for easy time manipulation
-
-        :param start: The starting date of the time series  
+        :param start: The starting date of the time series
         :type start: datetime
         :param increment: the time interval
         :type increment: int
@@ -99,7 +96,6 @@ class TimeSeries:
     def clip(self, starting_date,  final_date):
         """
         Clip a time series from a specific date
-
         :param starting_date: date str in the form of mm/dd/yyyy
         :type starting_date: str
         :param final_date: ending date in the form of mm/dd/yyyy
@@ -113,7 +109,7 @@ class TimeSeries:
 
     def denoise(self):
         """
-        Denoise a time series. Should be able to accomplish 
+        Denoise a time series. Should be able to accomplish
         this by calling cubic_root
         """
 
@@ -228,7 +224,7 @@ class TimeSeries:
                 new_df[col] = np.log10(new_df[col])
 
         # Return our new DataFrame
-        return new_df
+        return TimeSeries(new_df)
 
     def cubic_root(self):
         """
@@ -244,25 +240,64 @@ class TimeSeries:
                 new_df[col] = new_df[col] ** (1 / 3)
 
         # Return our new DataFrame
-        return new_df
+        return TimeSeries(new_df)
 
-    def split_data(self, perc_training=.8, perc_valid=.1, perc_test=.1):
+    def split_data(self, perc_training=.8, perc_valid=.01, perc_test=.19, ):
         """
         Splits a time series into training, validation, and testing according to the given percentages.
         """
-        results = []
-        perone = perc_training
-        pertwo = perc_training + perc_valid
-        perthree = perc_training + perc_test + perc_valid
-        with open(file_name) as csvfile:
-            array = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)  # change contents to floats
-            for row in array:  # each row is a list
-                results.append(row)
-        self.train = results[0:len(results)*perone-1]
-        self.val = results[len(results)*perc_training-1:len(results)*pertwo-1]
-        self.test = results[len(results)*pertwo:len(results)*perthree]
+        perc_valid += perc_training
+        perc_test += perc_valid
+        df = pd.DataFrame(self.data)
+        array = df.values.tolist()
+        timeList = []
+        varList = []
+        for index in array:
+            timeList.append(index[0])
+            varList.append(index[1])
+        self.train = varList[0:int(len(array) * perc_training) - 1]
+        self.val = varList[int(len(array) * perc_training):int(len(array) * perc_valid) - 1]
+        self.test = varList[int(len(array) * perc_valid):int(len(array) * perc_test) - 1]
 
+    def design_matrix(self, input_index=0, output_index=25):
+        trainingData = self.train
+        trainingMatrix = []
+        for i in range(len(trainingData)):
+            j = 0
+            X_train = []
+            y_train = []
+            while j < output_index:
+                X_train.append(trainingData[i + j])
+                j += 1
+            y_train.append(trainingData[i + j])
+            trainingMatrix.append([X_train, y_train])
 
-'''ts = TimeSeries()
-ts.read_from_file('Project Description/Time Series Data 2/wind_cointzio_10m_complete.csv')
-ts.split_data()'''
+        testData = self.test
+        testMatrix = []
+        for i in range(len(testData)):
+            j = 0
+            X_test = []
+            y_test = []
+            while j < output_index:
+                X_test.append(trainingData[i + j])
+                j += 1
+            y_test.append(testData[i + j])
+            testMatrix.append([X_test, y_test])
+
+        return trainingMatrix, testMatrix
+
+    def ts2db(self, input_file_name, perc_training, perc_valid, perc_test, input_index,
+              output_index, output_file_name):
+        """read the file
+            split data
+            produce a new database"""
+        if input_file_name:
+            self.read_from_file(input_file_name)
+
+        self.split_data(perc_training, perc_valid, perc_test)
+        trainingMatrix, testMatrix = self.design_matrix()
+
+        x_train, y_train = zip(*trainingMatrix)
+        x_test, y_test = zip(*testMatrix)
+
+        return x_train, y_train, x_test, y_test
