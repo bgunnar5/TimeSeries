@@ -118,7 +118,7 @@ class TimeSeries:
         """
 
         self.impute_missing()
-        self.denoise()
+        self.impute_outliers()
 
         return TimeSeries(self.data)
 
