@@ -24,11 +24,9 @@ class TimeSeries:
 
     def read_from_file(self, file_name: str):
         """
-        Read from a CSV file, the project description
-        says the CSV files are ordered in (time, magnitude)
-        Index by time
+        Read from a CSV file and create a Pandas dataframe
         :param file_name: name of the csv file to open
-        :return: void
+        :return: a time series
         """
 
         try:
@@ -50,7 +48,7 @@ class TimeSeries:
 
     def assign_time(self, start: datetime, increment: int):
         """
-         If a csv file does not include a date section, this method adds it. 
+        If a csv file does not include a date section, this method adds it. 
         Accomplished by iterating over all rows and adding the date
         Expected input: 01/23/2021 12:30 (mm/dd/yyyy hh:mm)
         Use regex to extract date information to create a datetime object
@@ -59,6 +57,7 @@ class TimeSeries:
         :type start: datetime
         :param increment: the time interval
         :type increment: int
+        :return: void
         """
         month_reg = r"^([0-9]{2})"  # matches the month
         day_reg = r"\/([0-9]{2})\/"  # matches the day
@@ -96,11 +95,13 @@ class TimeSeries:
 
     def clip(self, starting_date,  final_date):
         """
-        Clip a time series from a specific date
+        This method extracts time series data from the dataframe
+        within a specified date (starting_date) and ending date (final_date)
         :param starting_date: date str in the form of mm/dd/yyyy
         :type starting_date: str
         :param final_date: ending date in the form of mm/dd/yyyy
         :type final_date: str
+        :return: TimeSeries with extracted data
         """
 
         first_date = self.data.columns[0]  # copy the date header from csv
@@ -110,8 +111,12 @@ class TimeSeries:
 
     def denoise(self):
         """
-        Denoise a time series. Should be able to accomplish
-        this by calling cubic_root
+        Denoise a time series. This is accomplished by first 
+        filling in missing values and then imputing outliers. 
+        This method also modifies self.data and returns a new 
+        TimeSeries.
+
+        :return: TimeSeries with denoised data
         """
 
         self.impute_missing()
@@ -124,6 +129,8 @@ class TimeSeries:
         Compute missing values such as NaN's
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.fillna.html
         Fills data to the right to NaNs
+
+        :returns: void
         """
 
         temp = self.data.fillna(method='bfill')
@@ -131,7 +138,10 @@ class TimeSeries:
 
     def difference(self):
         """
-        Calculate the difference between data rows
+        This method calculates the difference between columns. 
+        This method only modifies the data columns.
+
+        :return: TimeSeries with difference calculated
         """
 
         data_index = len(self.data.columns) - 1
@@ -147,6 +157,11 @@ class TimeSeries:
         Find and remove outlies from dataframe
         Referenced: https://stackoverflow.com/questions/23199796/
         detect-and-exclude-outliers-in-pandas-data-frame
+
+        Find the low and high quantile in the dataframe and
+        look through the whole dataframe and remove that value. 
+
+        :returns: void
         """
 
         temp = self.data.copy()
@@ -166,7 +181,7 @@ class TimeSeries:
         A continuous run can be defined as rows that don't have
         any missing information (NaNs).
         df = dataframe
-        :return: longest continuous run dataframe
+        :return: TimeSeries with longest continuous run
         """
 
         temp = self.data.isna()  # find NaNs in df
@@ -210,6 +225,8 @@ class TimeSeries:
     def standardize(self):
         """
         Produces a time series whose mean is 0 and variance is 1.
+
+        :returns: void
         """
         df = pd.DataFrame(self.data)
         df_stand = df   # (df - 0)/sqrt(1)
@@ -219,6 +236,8 @@ class TimeSeries:
         """
         Produces a time series whose elements are the logarithm of the original
         elements.
+
+        :returns: Timeseries with logarithm'd data
         """
         # Create a copy of the current DataFrame
         new_df = self.data.copy()
@@ -235,6 +254,8 @@ class TimeSeries:
     def cubic_root(self):
         """
         Produces a time series whose elements are the original elements’ cubic root.
+
+        :return: TimeSeries with Cubic root
         """
         # Create a copy of the current DataFrame
         new_df = self.data.copy()
@@ -251,6 +272,8 @@ class TimeSeries:
     def split_data(self, perc_training=.8, perc_valid=.01, perc_test=.19, ):
         """
         Splits a time series into training, validation, and testing according to the given percentages.
+
+        :return: void
         """
         perc_valid += perc_training
         perc_test += perc_valid
