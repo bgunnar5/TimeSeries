@@ -46,7 +46,7 @@ class TimeSeries:
 
         self.data.to_csv(file_name)
 
-    def assign_time(self, start: datetime, increment: int):
+    def assign_time(self, start: str, increment: int):
         """
         If a csv file does not include a date section, this method adds it. 
         Accomplished by iterating over all rows and adding the date
