@@ -21,7 +21,7 @@ def mlp_model(input_dimension=100, output_dimension=1, layers=10):
                                 input and output dimensions)
     '''
     network = [input_dimension] * (layers - 2)
-    return (MLPRegressor(hidden_layer_sizes=network)
+    return (MLPRegressor(hidden_layer_sizes=network))
 
 
 def rf_model():
