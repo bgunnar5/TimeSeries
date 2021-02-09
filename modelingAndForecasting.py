@@ -1,30 +1,27 @@
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
 from preporcessing import TimeSeries
 import numpy as np
 
-def mlp_model():
+def mlp_model(input_dimension=100, output_dimension=1, layers=10):
     '''
     Wrapper function for multilayer perceptron model.
 
     Parameters
     ----------
-        - input_dimension: Dimension (number of neurons) in first layer. Comes from input vector of design_matrix function.
-                           Default 25.
-        - output_dimension: Dimension out of first layer, becomes new input_dimension for second layer, etc?
-                            Default 25?
-        - [layers]: (optional) Number of layers in the neural network.
+        - input_dimension: Dimension (number of neurons) in first layer. Comes from input_index of ts2db function.
+                           Default 100.
+        - output_dimension: Dimension out of output layer. Describes how many output elements the model calculates at a time.
+                            Default 1.
+        - [layers]: (optional) Number of layers in the neural network. Default 10.
 
     Returns
     -------
-        - MLPClassifier object (uses same defaults as sklearn, but hidden_layer_sizes specified from
+        - MLPRegressor object (uses same defaults as sklearn, but hidden_layer_sizes specified from
                                 input and output dimensions)
     '''
-    #network = [input_dimension] * (layers - 2)
-    # MLPRegressor(hidden_layer_sizes=network)
-    return MLPRegressor()
+    network = [input_dimension] * (layers - 2)
+    return (MLPRegressor(hidden_layer_sizes=network)
 
 
 def rf_model():
@@ -37,23 +34,23 @@ def rf_model():
 
     Returns
     -------
-        - RandomForestClassifier object (uses same defaults as sklearn)
+        - RandomForestRegressor object (uses same defaults as sklearn)
     '''
     return RandomForestRegressor()
 
 def fit(model, x_train, y_train):
     '''
-    Wrapper function for fit methods of RandomForestClassifier and MLPClassifier objects
+    Wrapper function for fit methods of RandomForestRegressor and MLPRegressor objects
 
     Parameters
     ----------
-        - model: RandomForestClassifier or MLPClassifier object
-        - x_train: TODO
-        - y_train: TODO
+        - model: RandomForestRegressor or MLPRegressor object
+        - x_train: training input data, derived from ts2db
+        - y_train: training output data, derived from ts2db
 
     Returns
     -------
-        - RandomForestClassifier object (uses same defaults as sklearn)
+        - Trained model object
     '''
     y_train_array = np.ravel(y_train)
     model.fit(x_train, y_train_array)
@@ -61,45 +58,16 @@ def fit(model, x_train, y_train):
 
 def predict(model, X):
     '''
-    Wrapper function for predict methods of RandomForestClassifier and MLPClassifier objects
+    Wrapper function for predict methods of RandomForestRegression and MLPRegressor objects
 
     Parameters
     ----------
-        - model: RandomForestClassifier or MLPClassifier object
-        - X: State of data beginning at input_index from design_matrix
+        - model: RandomForestRegressor or MLPRegressor object
+        - X: State of data beginning at input_index, input test data typically passed in (from ts2db)
 
     Returns
     -------
-        - model.predict(X): List of predicted data values
+        - predictions: List of predicted data values from .predict() method in sklearn.
     '''
     predictions = model.predict(X)
     return predictions
-"""
-ts = TimeSeries()
-filename = 'Project Description/Time Series Data 2/wind_cointzio_10m_complete.csv'
-input_index, output_index, X_train, y_train, X_test, y_test = ts.ts2db(filename, .8, .01, .19, 0, 25, None)
-
-
-# TODO: modify to fit Yifeng's functional form
-# X, y = make_classification(n_samples=100, random_state=1)
-# input_index, output_index, X_train, X_test, y_train, y_test = train_test_split(X, y,
-#                                                     random_state=1)
-
-### EXAMPLE: ###
-mlpDimension = output_index - input_index
-
-# Classify the models:
-mlp = mlp_model(mlpDimension, mlpDimension)
-rf = rf_model()
-
-# Create a fit using builtin method
-fit(mlp, X_train, y_train)
-fit(rf, X_train, y_train)
-
-# Forecast using builtin method
-mlp_prediction = predict(mlp, X_test)
-rf_prediction = predict(mlp, X_test)
-
-print(mlp_prediction)
-print(rf_prediction)
-"""
