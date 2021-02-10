@@ -232,14 +232,18 @@ class TimeSeries:
         return TimeSeries(new_df)
 
     def standardize(self):
-        """
-        Produces a time series whose mean is 0 and variance is 1.
+    """
+    Produces a time series whose mean is 0 and variance is 1.
+    :returns: Timeseries with standard data
+    """
+    new_df = self.data.copy()
 
-        :returns: void
-        """
-        df = pd.DataFrame(self.data)
-        df_stand = df   # (df - 0)/sqrt(1)
-        #print(df_stand)
+    # Loop through the columns in the DataFrame
+    for col in new_df:
+        # If the column contains floats or integers we can take the scaling and store it
+        if new_df[col].dtype == 'float64' or new_df[col].dtype == 'int64':
+            new_df[col] = (new_df[col] - 0) / 1
+    return TimeSeries(new_df)
 
     def logarithm(self):
         """
