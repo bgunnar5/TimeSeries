@@ -1,6 +1,6 @@
 import ts_analysis_support as tsas
 
-filename = "Project Description/Time Series Data/1_temperature_test.csv"
+filename = "data/Time Series Data/1_temperature_test.csv"
 
 def main():
     t = tsas.tree.TransformationTree(tsas.operatorkeys.operator_input_keys, tsas.operatorkeys.operator_output_keys)
