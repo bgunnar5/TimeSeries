@@ -1,3 +1,11 @@
+'''
+This file contains functions to plot data in multiple ways. It also includes a function to run a Shapiro-Wilkinson
+test on time series data and three error calculating tests for forecasting models (mse, mape, and smape).
+Author: Brian Gunnarson
+Group name: The Classy Coders
+Most recent modification: 2/9/21
+'''
+
 import matplotlib.pyplot as plt
 from preprocessing import TimeSeries
 from typing import List
