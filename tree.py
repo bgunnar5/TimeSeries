@@ -1,16 +1,15 @@
 """
-Transformation tree allows data scientists to build and evaluate multiple pipelines
-
-Parts:
-Node: Stores individual operator along with positional and keyword args necessary to execute operator (except for data),
-along with references to parent and children nodes. Includes method to execute operator function stored in Node.
-Tree: Non-binary tree made up of Nodes. Includes methods to manipulate the tree by adding/removing/changing individual nodes, enforce
-compatibility between nodes, execute pipelines in the tree, and write/read trees to/from files.
+This module implements a transformation tree allows data scientists to build and evaluate multiple pipelines,
+as specified in the project 1 specifications.
+Authors: Brian Gunnarson, Sam Peters
+Groupname: Class Coders
+Most recent modification: 2/9/2021
 """
+
 import pickle
 from copy import deepcopy
 from queue import Queue
-import preporcessing as preprocessing
+import  preprocessing
 
 class CompatibilityError(Exception):
     """ 
@@ -20,7 +19,18 @@ class CompatibilityError(Exception):
     pass
 
 class Node:
+    """ Node class used inside TransformationTree class """
     def __init__(self, operator, args, parent=None, tag="", save_result=False):
+        """
+        Initializes a Node object containing operator, tag, args, parent, children, and save_result attributes
+
+        Args:
+            operator (function): function to be executed when self.apply_operator method is called
+            args (list): list of positional arguments to be included when calling self.operator function
+            parent (Node, optional): Parent of the initialized Node in the tree. Defaults to None.
+            tag (str, optional): Tag used to identify and find the initialized Node in the tree. Defaults to "".
+            save_result (bool, optional): Dictates whether the result of calling self.apply_method should be saved during tree execution. Defaults to False.
+        """
         # Operator function applied to input data
         self.operator = operator
         # Tag used to identify node
@@ -31,14 +41,30 @@ class Node:
         self.parent = parent
         # list of children nodes
         self.children = []
-        # Whether or not the result of executing the stored operator is added to the self.results list in the TransformationTree object
+        # Whether or not the result of executing the stored operator is added to the tree.results list in the TransformationTree object
+        # The results attribute in the TransformationTree object is a non branch-specific list used to access the results of executing specific operators after the entire
+        # tree has finished executing
         self.save_result = save_result
     
     def apply_operator(self, dynamic_data: list):
-        """ Applies stored operator and args to given data, returning the result """
+        """
+        Calls self.operator, passing in the values contained in dynamic_data and self.args as positional arguments
+
+        Args:
+            dynamic_data (list): [description]
+
+        Returns:
+            Any: The result of calling self.operator
+        """
         return self.operator(*dynamic_data, *self.args)
 
     def __str__(self):
+        """
+        [summary]
+
+        Returns:
+            str: 
+        """
         op_string = str(self.operator).split()[1]
         if self.tag:
             return f"{op_string}:{self.tag}"
