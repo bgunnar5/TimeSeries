@@ -2,7 +2,7 @@
 This module implements a transformation tree allows data scientists to build and evaluate multiple pipelines,
 as specified in the project 1 specifications.
 Authors: Brian Gunnarson, Sam Peters
-Groupname: Class Coders
+Groupname: The Classy Coders
 Most recent modification: 2/9/2021
 """
 
