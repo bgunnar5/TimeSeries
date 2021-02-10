@@ -1,3 +1,12 @@
+This README file explains exactly what this project is about. It displays the authors, file creation dates, and course/assignment names. Additionally, it includes a section on how to compile and run the program as well as the dependencies you will need. It concludes with a brief structure of the directories.
+
+Author: Brian Gunnarson
+
+Group Name: The Classy Coders
+
+Last Modification Date: 2/9/21
+
+
 TIME SERIES ANALYSIS SUPPORT
 
 DESCRIPTION
