@@ -59,37 +59,44 @@ class TimeSeries:
         :type increment: int
         :return: void
         """
-        month_reg = r"^([0-9]{2})"  # matches the month
-        day_reg = r"\/([0-9]{2})\/"  # matches the day
-        year_reg = r"\/([0-9]{4})"  # matches the year
-        hour_reg = r"( [0-9]{2}):"  # matches the hour
-        minute_reg = r":([0-9]{2})"  # matches the minute
-        month = re.search(month_reg, start)  # extracted month
-        day = re.search(day_reg, start)  # extracted day
-        year = re.search(year_reg, start)  # extracted year
-        hour = re.search(hour_reg, start)  # extracted hour
-        minute = (re.search(minute_reg, start))  # extracted minute
 
-        # datetime object for easy time manipulation over an interval
-        date = datetime(year=int(year.group(1)), month=int(month.group(1)),
-                        day=int(day.group(1)), hour=int(hour.group(1)),
-                        minute=int(minute.group(1)))
+        if type(increment) != int:  # catch invalid input
+            return
+        
+        try:
+            month_reg = r"^([0-9]{2})"  # matches the month
+            day_reg = r"\/([0-9]{2})\/"  # matches the day
+            year_reg = r"\/([0-9]{4})"  # matches the year
+            hour_reg = r"( [0-9]{2}):"  # matches the hour
+            minute_reg = r":([0-9]{2})"  # matches the minute
+            month = re.search(month_reg, start)  # extracted month
+            day = re.search(day_reg, start)  # extracted day
+            year = re.search(year_reg, start)  # extracted year
+            hour = re.search(hour_reg, start)  # extracted hour
+            minute = (re.search(minute_reg, start))  # extracted minute
 
-        # create the missing columns in the dataframe
-        # self.data['DATE (MM/DD/YYYY)'] = None
-        # self.data['MST'] = None
-        self.data.insert(0, "Date", None)
-        self.data.insert(1, "Time", None)
+            # datetime object for easy time manipulation over an interval
+            date = datetime(year=int(year.group(1)), month=int(month.group(1)),
+                            day=int(day.group(1)), hour=int(hour.group(1)),
+                            minute=int(minute.group(1)))
 
-        """
-        Assign each row data in the missing time and date columns.
-        Increment time time by increment. .date() and .time()
-        pull exactly what it sounds like
-        """
-        for i in range(len(self.data)):
-            self.data.at[i, self.data.columns[0]] = date.date()
-            self.data.at[i, self.data.columns[1]] = date.time()
-            date += timedelta(hours=int(increment))
+            # create the missing columns in the dataframe
+            # self.data['DATE (MM/DD/YYYY)'] = None
+            # self.data['MST'] = None
+            self.data.insert(0, "Date", None)
+            self.data.insert(1, "Time", None)
+
+            """
+            Assign each row data in the missing time and date columns.
+            Increment time time by increment. .date() and .time()
+            pull exactly what it sounds like
+            """
+            for i in range(len(self.data)):
+                self.data.at[i, self.data.columns[0]] = date.date()
+                self.data.at[i, self.data.columns[1]] = date.time()
+                date += timedelta(hours=int(increment))
+        except:
+            print("Error!")
 
         #print(self.data)
 
