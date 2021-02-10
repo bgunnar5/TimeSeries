@@ -287,37 +287,7 @@ class TimeSeries:
         self.train = varList[0:int(len(array) * perc_training) - 1]
         self.val = varList[int(len(array) * perc_training):int(len(array) * perc_valid) - 1]
         self.test = varList[int(len(array) * perc_valid):int(len(array) * perc_test) - 1]
-    """
-    def design_matrix(self, input_index=0, output_index=25):
-        trainingData = self.train
-        trainingMatrix = []
-        for i in range(len(trainingData)):
-            j = 0
-            X_train = []
-            y_train = []
-            if trainingData[i] == trainingData[-1]:
-                break
-            while j < output_index:
-                X_train.append(trainingData[i+j])
-                j+=1
-            y_train.append(trainingData[i+j])
-            trainingMatrix.append([X_train,y_train])
 
-        testData = self.test
-        testMatrix = []
-        for i in range(len(testData)):
-            j = 0
-            X_test = []
-            y_test = []
-            if testData[i] == testData[-1]:
-                break
-            while j < output_index:
-                X_test.append(testData[i+j])
-                j+=1
-            y_test.append(testData[i+j])
-            testMatrix.append([X_test,y_test])
-        return trainingMatrix, testMatrix
-    """
     def design_matrix(self, input_index=0, output_index=25):
         x_train, y_train = [],[]
         x_start = 0
