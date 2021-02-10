@@ -34,7 +34,7 @@ Assignment: Project 1 - Time Series Analysis
 STEPS TO COMPILE AND RUN
 If you want to run this system using a virtual environment you can use the following steps at the command line:
 Go to the project directory
-Run the command: “python -m vena proj-1-env”
+Run the command: “python -m venv proj-1-env”
 Depending on the system:
 On Unix/macOS run: “source proj-1-env/bin/activate”
 On Windows run: “proj-1-env\Scripts\activate.bat”
