@@ -60,8 +60,6 @@ class TimeSeries:
         :return: void
         """
 
-        if type(increment) != int:  # catch invalid input
-            return
         
         try:
             month_reg = r"^([0-9]{2})"  # matches the month
@@ -98,7 +96,7 @@ class TimeSeries:
         except:
             print("Error!")
 
-        #print(self.data)
+        print(self.data)
 
     def clip(self, starting_date,  final_date):
         """
