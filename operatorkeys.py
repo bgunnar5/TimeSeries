@@ -1,8 +1,19 @@
+'''
+This module contains the dictionaries associated with operator inputs and outputs. It's used to help build branches
+of the tree in tree.py.
+Authors: Brian Gunnarson and Sam Peters
+Group name: The Classy Coders
+Most recent modification: 2/4/21
+'''
+
+# Import necessary components
 import preprocessing
 import modelingAndForecasting as mf
 import visualization as vs
 
+# Dictionary for the input keys
 operator_input_keys = {
+    # Inputs for preprocessing component
     preprocessing.TimeSeries: [],
     preprocessing.TimeSeries.read_from_file: ["timeseries_without_data"],
     preprocessing.TimeSeries.write_to_file: ["timeseries_data"],
@@ -20,11 +31,13 @@ operator_input_keys = {
     preprocessing.TimeSeries.split_data: ["timeseries_data", "perc_training", "perc_valid", "perc_test"],
     preprocessing.TimeSeries.ts2db: ["timeseries_data"],
 
-    mf.mlp_model: [], # dimensions derived from indices of design_matrix; layers parameter optional (default 3),
-    mf.rf_model: [], # All parameters are defaulted (different than MLP),
+    # Inputs for modelingAndForecasting component
+    mf.mlp_model: [],
+    mf.rf_model: [],
     mf.fit: ["model", "x_train", "y_train"],
     mf.predict: ["trained_model", "x_test"],
 
+    # Inputs for visualization component
     vs.plot: ["timeseries_data"],
     vs.histogram: ["timeseries_data"],
     vs.box_plot: ["timeseries_data"],
@@ -34,7 +47,9 @@ operator_input_keys = {
     vs.smape: ["y_test", "y_forecast"]
 }
 
+# Dictionary for the output keys
 operator_output_keys = {
+    # Outputs for the preprocessing component
     preprocessing.TimeSeries: ["timeseries_without_data"],
     preprocessing.TimeSeries.read_from_file: ["timeseries_data"],
     preprocessing.TimeSeries.write_to_file: [],
@@ -53,13 +68,13 @@ operator_output_keys = {
     preprocessing.TimeSeries.design_matrix: ["training_matrix", "test_matrix"],
     preprocessing.TimeSeries.ts2db: ["x_train", "y_train", "x_test", "y_test"],
 
-
+    # Outputs for the modelingAndForecasting component
     mf.mlp_model: ["model"],
     mf.rf_model: ["model"],
     mf.fit: ["trained_model"],
     mf.predict: ["y_forecast"],
 
-    # Better to leave these empty or as "timeseries_data"??
+    # Outputs for the visualization component
     vs.plot: [],
     vs.histogram: [],
     vs.box_plot: [],

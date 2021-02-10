@@ -1,3 +1,11 @@
+'''
+This file runs through a brief demo of how to create a branch, save and load a tree, replicate a subtree, modify
+different branches of the tree, execute the tree, and manipulate the results.
+Author: Sam Peters
+Group name: The Classy Coders
+Most recent modification: 2/9/21
+'''
+
 import ts_analysis_support as tsas
 
 filename = "data/Time Series Data/1_temperature_test.csv"
