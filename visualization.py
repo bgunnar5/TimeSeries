@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from preporcessing import TimeSeries
+from preprocessing import TimeSeries
 from typing import List
 from scipy.stats import shapiro
 from scipy.stats import probplot

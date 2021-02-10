@@ -1,6 +1,6 @@
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
-from preporcessing import TimeSeries
+from preprocessing import TimeSeries
 import numpy as np
 
 def mlp_model(input_dimension=100, output_dimension=1, layers=10):
