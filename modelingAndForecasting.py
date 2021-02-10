@@ -1,3 +1,10 @@
+'''
+This file contains functions to wrap sklearn regression models as well as their 'fit' and 'predict' methods.
+Authors: Tyler Christenson & Sam Peters
+Group name: The Classy Coders
+Most recent modification: 2/9/21
+'''
+
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
 from preprocessing import TimeSeries
