@@ -1,7 +1,7 @@
 '''
 This module defines a TimeSeries object that will be used in all other components. It provides all the preprocessing
 methods for time series data as specified in the Project 1 handout.
-Authors: Jacob Rammer and Yifeng Cui
+Authors: Yifeng Cui and Jacob Rammer
 Group name: The Classy Coders
 Most recent modification: 2/9/21
 '''
