@@ -204,6 +204,19 @@ class TransformationTree:
     
 
     def replicate_subtree(self, subtree: Node, tag_modifier="_copy"):
+        '''
+        This method creates a copy of a subtree starting at a specified Node.
+
+        ARGS:
+            subtree: the Node to start replicating the subtree at
+            tag_modifier: a string to clarify that the new subtree is a copy
+
+        CALLS:
+            self._modify_tags(): modifies the tags of Nodes in the replicated subtree using tag_modifier
+
+        RETURNS:
+            replicated: a copy of the subtree starting at "subtree"
+        '''
         parent_node = subtree.parent
         # Temporarily remove the parent of the original node, so we can deepcopy it without replicating the nodes above it
         subtree.parent = None
@@ -226,7 +239,6 @@ class TransformationTree:
         end_node -- Last node in the copied path
 
         Return list of Node objects
-
         """
         replica = self._copy_node(end_node)
         current_node = end_node.parent
@@ -243,6 +255,7 @@ class TransformationTree:
         return replica
 
     def _copy_node(self, node):
+        '''Copies the specified node'''
         return Node(node.operator, node.args, tag=node.tag, save_result=node.save_result)
         
 
@@ -267,7 +280,14 @@ class TransformationTree:
         """ 
         Checks if the required input for the new node's operator matches the 
         expected data types that will be passed to the new operator by the previous nodes
-        in the tree branch
+        in the tree branch.
+
+        ARGS:
+            new_node: the node we're trying to add to the tree branch
+            parent_node: the previous node in the tree branch
+
+        RETURNS:
+            True if the required input matches the expected data types. False otherwise.
         """ 
         required_input_keys = self.input_keys[new_node.operator]
         branch_key_set = set()
@@ -283,6 +303,15 @@ class TransformationTree:
         return True
 
     def get_path_str(self, end_node):
+        '''
+        Prints a path in string format by storing nodes in a list and then joining them.
+
+        ARGS:
+            end_node: The last node in a path of the tree
+
+        RETURNS:
+             A string representation of a path
+        '''
         node_strs = []
         current_node = end_node
         while current_node != self.root.parent:
@@ -295,12 +324,30 @@ class TransformationTree:
         return " -> ".join(node_strs)
 
     def export_pipeline(self, end_node: Node):
+        '''
+        Exports a Pipeline object
+
+        ARGS:
+            end_node: The last node in a path of the tree
+
+        CALLS:
+            Pipeline(): to create a pipeline object
+
+        RETURNS:
+             pip: a Pipeline object
+        '''
         pip = Pipeline(self, end_node)
         return pip
 
 
 # Save works for both trees and pipelines so we use the argument name 'object'
 def save(object, filename):
+    '''
+    Saves a TimeSeries or Pipeline object to a file.
+
+    RETURNS:
+        status: a boolean value to determine if the save worked properly
+    '''
     try:
         pickle.dump(object, open(filename, 'wb'))
         status = True
@@ -310,6 +357,12 @@ def save(object, filename):
 
 # Load works for both trees and pipelines so we use the variable name 'loaded_object'
 def load(filename):
+    '''
+    Loads a TimeSeries or Pipeline object to a file.
+
+    RETURNS:
+        status: a boolean value to determine if the save worked properly
+    '''
     try:
         loaded_object = pickle.load(open(filename, 'rb'))
         return loaded_object
@@ -324,6 +377,12 @@ class Pipeline:
         self.results = None
 
     def run_path(self):
+        '''
+        Executes a Pipeline path and modifies self.results.
+
+        CALLS:
+            TransformationTree.execute_path: calls this method to run a path of the tree
+        '''
         self.tree.execute_path(self.end_node)
         self.results = self.tree.results
         
