@@ -60,8 +60,7 @@ def fit(model, x_train, y_train):
         - Trained model object
     '''
     y_train_array = np.ravel(y_train)
-    model.fit(x_train, y_train_array)
-    return model
+    return model.fit(x_train, y_train_array)
 
 def predict(model, X):
     '''
