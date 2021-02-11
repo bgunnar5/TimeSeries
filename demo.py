@@ -18,10 +18,14 @@ def main():
     denoise = t.add_operator(tsas.preprocessing.TimeSeries.denoise, [], assign_time)
     ts2db = t.add_operator(tsas.preprocessing.TimeSeries.ts2db, [None, 0.8, 0.1, 0.1, 2, 1, None], denoise, tag="db",
                            save_result=False)
+    extract = t.add_operator(tsas.preprocessing.TimeSeries.clip, ["01/01/2020", "01/01/2021"], ts2db)
     model = t.add_operator(tsas.modelingAndForecasting.mlp_model, [], ts2db, tag="model")
     fit = t.add_operator(tsas.modelingAndForecasting.fit, [], model)
     predict = t.add_operator(tsas.modelingAndForecasting.predict, [], fit)
     mse = t.add_operator(tsas.visualization.mse, [], predict, tag="mse", save_result=True)
+    plot = t.add_operator(tsas.visualization.plot, [], mse)
+    his = t.add_operator(tsas.visualization.histogram, [], plot)  # histogram
+    box = t.add_operator(tsas.visualization.box_plot, [], his)  # box plot
 
     # Save then loading tree, and finding the ts2db operator in the branch we previously created
     tsas.tree.save(t, "demo_tree.sav")
@@ -43,6 +47,6 @@ def main():
     sorted_results = sorted(t.results, key=lambda x: x[0])
     best_branch = sorted_results[0]
     print(f"Best MSE: {best_branch[0]}, from branch: {t.get_path_str(best_branch[1])}")
-
+    
 
 main()
