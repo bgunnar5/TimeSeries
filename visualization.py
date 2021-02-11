@@ -51,6 +51,7 @@ def histogram(ts: TimeSeries):
     # Create the histogram and plot, then display them side-by-side
     ts.data.hist(ax=axes[0])
     ts.data.plot(ax=axes[1])
+    plt.show()
 
 
 def box_plot(ts: TimeSeries):
