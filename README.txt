@@ -65,7 +65,8 @@ operatorkeys.py, modelingAndForecasting.py, and visualization.py).
 For Example Usage See demo.py
 
 SOFTWARE DEPENDENCIES
-See requirements.txt
+Python 3.8
+See requirements.txt for specific Python packages required.
 
 DIRECTORY STRUCTURE
 Top Level: source code files (preprocessing.py, modelingAndForecasting.py, visualization.py, tree.py, 
