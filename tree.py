@@ -60,10 +60,10 @@ class Node:
 
     def __str__(self):
         """
-        [summary]
+        Returns string representing Node object
 
         Returns:
-            str: 
+            str: String containing operator name, or the operator name and tag string
         """
         op_string = str(self.operator).split()[1]
         if self.tag:
@@ -72,6 +72,12 @@ class Node:
             return f"{op_string}"
 
     def __repr__(self):
+        """
+        Creates string representation of Node object
+
+        Returns:
+            [type]: Takes the form of "Node(operator_name)" or "Node(operator_name):tag" depending on if the node's tag == ""
+        """
         op_string = str(self.operator).split()[1]
         if self.tag:
             return f"Node({op_string}):{self.tag}"
@@ -80,6 +86,15 @@ class Node:
 
 class TransformationTree:
     def __init__(self, input_keys, output_keys):
+        """
+        Creates a TransformationTree object, initializing results, root, input_keys, and output_keys attributes in the object.
+
+        Args:
+            input_keys (dict): Describes which key value pairs should be pulled from a branch specific dictionary and used as input during an operator's
+            execution. Keys in this dict are operator functions, and values are lists of strings (used as keys in the branch dictionary to get input values).
+            output_keys (dict): Describes how an operator's output should be stored in a branch specific dictionary after execution. Keys in this dict are operator functions,
+            and values are lists of strings (used as keys in the branch dictionary to store output values).
+        """
         self.results = []
         self.root = Node(preprocessing.TimeSeries,[], tag="root")
         self.root.children = []
@@ -89,10 +104,10 @@ class TransformationTree:
     def _execute(self, path=None):
         """
         Generic tree execution method called by self.execute_tree and self.execute_path.
-        Modifies self.results
+        Modifies self.results.
 
         Args:
-            path (list, optional): List of nodes in path to execute. If None whole tree will be executed. Defaults to None.
+            path (list, optional): List of nodes in a path to execute. If None whole tree will be executed. Defaults to None.
         """
         self.results = []
         q = Queue()
@@ -125,11 +140,20 @@ class TransformationTree:
 
 
     def execute_tree(self):
-        """ Executes full tree """
+        """
+        Executes entire tree by calling self._execute() without a path argument.
+        Modifies self.results
+        """
         self._execute(path=None)
 
     def execute_path(self, end_node):
-        """ Executes a path in the tree. End node denotes the last node in the path """
+        """
+        Executes a single path in the tree by calling self._execute(path=end_node).
+        Modifies self.results
+
+        Args:
+            end_node (Node): Last node in the path to be executed.
+        """
         self.results = []
         # Finding the path
         path = [end_node]
@@ -140,11 +164,28 @@ class TransformationTree:
         self._execute(path=path)
 
     def get_nodes_by_tag(self, tag):
-        """ Find all nodes in the tree with the given operator and return a list. """
+        """
+        Finds all the nodes in the tree with a tag equal to the input tag.
+        Calls self._get_nodes()
+
+        Args:
+            tag (str): Tag to find
+
+        Returns:
+            [Node]: List of Nodes with a tag equal to the input tag.
+        """
         return self._get_nodes(tag, mode="tag")
 
     def get_nodes_by_operator(self, operator):
-        """ Find all nodes in the tree with the given operator and return a list. """
+        """
+        Finds all nodes in the tree containing the input operator function (operator).
+
+        Args:
+            operator (function): function to find
+
+        Returns:
+            [Node]: List of Nodes containing the same operator function as the input operator function.
+        """
         return self._get_nodes(operator, mode="operator")
 
     def _get_nodes(self, value, mode: str):
@@ -174,7 +215,23 @@ class TransformationTree:
         return result
 
     def add_operator(self, operator, args, parent_node, tag="", save_result=False):
-        """ Add operator to tree """
+        """
+        Adds a Node containing a new operator to the tree.
+
+        Args:
+            operator (function): Operator function to be called during tree execution
+            args ([Any]): Positional arguments using during operator function call
+            parent_node (Node): Parent of the new Node, must be an existing Node object in the tree.
+            tag (str, optional): String used by users to identify specific important Nodes later on. Defaults to "".
+            save_result (bool, optional): Specifies whether the rseult of executing the operator function should be saved to self.results,
+            for additional processing after the tree is finished executing. Defaults to False.
+
+        Raises:
+            CompatibilityError: Signifies that two successive operator functions are incompatible with each other.
+
+        Returns:
+            Node: Newly created Node in the tree.
+        """
         new_node = Node(operator, args, parent=parent_node, tag=tag, save_result=save_result)
         
         if not self._check_compatibility(parent_node, new_node):
@@ -184,6 +241,19 @@ class TransformationTree:
         return new_node
 
     def replace_operator(self, operator,args, node, tag="", save_result=False):
+        """
+        Updates the attributes of an existing node with new operator, args, tag, and save_result values.
+
+        Args:
+            operator (function): New operator function
+            args ([Any]): New list of positional args to be passed to the operator function during execution
+            node (Node): Node to be updated
+            tag (str, optional): New tag value. Defaults to "".
+            save_result (bool, optional): New save_result value. Defaults to False.
+
+        Returns:
+            Node: Newly updated node
+        """
         new_node = self.add_operator(operator, args, node.parent, tag=tag, save_result=save_result)
         # At this point the new_node and the old node (node) are both children of node.parent
         # We need to remove one of them later in the function depending on if the children are compatible with new_node
@@ -255,7 +325,16 @@ class TransformationTree:
         return replica
 
     def _copy_node(self, node):
-        '''Copies the specified node'''
+        """
+        Creates an exact copy of a given Node, except for the Node's children and parent attributes, which it sets to empty.
+        Used internally.
+
+        Args:
+            node (Node): Node to be copied.
+
+        Returns:
+            Node: Returns reference to Node copy
+        """
         return Node(node.operator, node.args, tag=node.tag, save_result=node.save_result)
         
 
@@ -371,6 +450,9 @@ def load(filename):
 
 
 class Pipeline:
+    """
+    Static pipeline of operator functions that process data. Can not be edited.
+    """
     def __init__(self, tree: TransformationTree, pipeline_end_node: Node):
         self.tree = tree
         self.end_node = pipeline_end_node
