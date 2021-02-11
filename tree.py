@@ -73,10 +73,10 @@ class Node:
 
     def __repr__(self):
         """
-        Creates string representation of Node object
+        Returns string representation of Node object
 
         Returns:
-            [type]: Takes the form of "Node(operator_name)" or "Node(operator_name):tag" depending on if the node's tag == ""
+            str: Takes the form of "Node(operator_name)" or "Node(operator_name):tag" depending on if the node's tag == ""
         """
         op_string = str(self.operator).split()[1]
         if self.tag:
@@ -308,7 +308,7 @@ class TransformationTree:
         start_node -- First node in the copied path
         end_node -- Last node in the copied path
 
-        Return list of Node objects
+        Return reference to first node in replica tree path
         """
         replica = self._copy_node(end_node)
         current_node = end_node.parent
@@ -383,10 +383,10 @@ class TransformationTree:
 
     def get_path_str(self, end_node):
         '''
-        Prints a path in string format by storing nodes in a list and then joining them.
+        Returns string representing path from the root node of the tree to a given node (end_node)
 
         ARGS:
-            end_node: The last node in a path of the tree
+            end_node: The last node in the path we want to turn into a string
 
         RETURNS:
              A string representation of a path
@@ -451,7 +451,7 @@ def load(filename):
 
 class Pipeline:
     """
-    Static pipeline of operator functions that process data. Can not be edited.
+    Static pipeline of operator functions that process data. Can be executed but not edited.
     """
     def __init__(self, tree: TransformationTree, pipeline_end_node: Node):
         self.tree = tree
